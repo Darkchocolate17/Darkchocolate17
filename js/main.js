@@ -55,7 +55,7 @@ const io = new IntersectionObserver((entries) => {
     $$('[data-count]', e.target).forEach(countUp);
     io.unobserve(e.target);
   });
-}, { threshold: 0.35 });
+}, { threshold: 0.18 });
 $$('.panel').forEach((p) => io.observe(p));
 
 function countUp(el) {
@@ -67,6 +67,17 @@ function countUp(el) {
     if (k < 1) requestAnimationFrame(tick);
   })(t0);
 }
+
+/* In-page links land on the middle of a chapter, where its camera stop is */
+$$('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+  const el = $(a.getAttribute('href'));
+  if (!el) return;
+  const k = el.matches('[data-key]') ? el : $('[data-key]', el);
+  if (!k) return;
+  e.preventDefault();
+  const r = k.getBoundingClientRect();
+  scrollTo({ top: r.top + scrollY + r.height / 2 - innerHeight / 2, behavior: reducedMotion ? 'auto' : 'smooth' });
+}));
 
 $('#year').textContent = new Date().getFullYear();
 $('#quote').addEventListener('submit', (e) => {
@@ -113,7 +124,11 @@ try {
   setChapter(0);
   throw err;
 }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+const touch = matchMedia('(pointer: coarse)').matches;
+const QUALITY = [1.5, 1.25, 1, 0.8, 0.65]; // pixel-ratio steps; drops a step whenever frames run slow
+let quality = 0;
+const pixelRatio = () => Math.min(devicePixelRatio, QUALITY[quality]);
+renderer.setPixelRatio(pixelRatio());
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 
@@ -126,7 +141,7 @@ scene.environmentIntensity = 0.42;
 
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 220);
 
-const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: touch ? 0 : 2 }));
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.42, 0.6, 0.92);
 composer.addPass(bloom);
@@ -166,8 +181,6 @@ const loopRings = [0, 1, 2].map((i) => {
 const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.62, 1), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: GREEN, emissiveIntensity: 2.4, wireframe: true }));
 const coreGlow = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), glow(GREEN, 4));
 hero.add(core, coreGlow);
-const heroLight = new THREE.PointLight(GREEN, 26, 22);
-hero.add(heroLight);
 
 function ingotGeometry(w = 2.2, h = 0.55, d = 0.95) {
   const g = new THREE.BoxGeometry(w, h, d);
@@ -185,14 +198,14 @@ const scrapGeos = [
   new THREE.CylinderGeometry(0.13, 0.13, 0.07, 6),      // hex nut
 ];
 const scrapColors = Object.values(METALS).map((c) => new THREE.Color(c));
-const SCRAP_PER = 130;
+const SCRAP_PER = 95;
 const dummy = new THREE.Object3D();
 const scrap = scrapGeos.map((geo) => {
   const mesh = new THREE.InstancedMesh(geo, metal(0xffffff, 0.34), SCRAP_PER);
   const items = [];
   for (let i = 0; i < SCRAP_PER; i++) {
     items.push({
-      a: rand(0, Math.PI * 2), r: rand(2.6, 5.4), y: rand(-2.6, 2.6) * rand(0.3, 1),
+      a: rand(0, Math.PI * 2), r: rand(2.6, 4.8), y: rand(-2.6, 2.6) * rand(0.3, 1),
       sp: rand(0.05, 0.22), spin: new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)),
       s: rand(0.6, 1.9), ph: rand(0, 6.28),
     });
@@ -232,9 +245,6 @@ for (let layer = 0; layer < 4; layer++) {
     ingots.push(m);
   }
 }
-const metalsLight = new THREE.PointLight(0xffa25c, 40, 20);
-metalsLight.position.set(-3, 3.5, 4);
-metals.add(metalsLight);
 
 /* ------------------------------------------------------------------ *
  *  2 · PCB — a board that explodes into its layers
@@ -293,9 +303,6 @@ for (let i = 0; i < 12; i++) {
   c.position.set(rand(-2.9, 2.9), h / 2 + 0.01, (Math.random() > 0.5 ? 1 : -1) * rand(1.75, 1.95) * (i % 2 ? 1 : 0.42));
   compLayer.add(c);
 }
-const pcbLight = new THREE.PointLight(GREEN, 50, 18);
-pcbLight.position.set(0, 4, 3);
-pcb.add(pcbLight);
 
 /* ------------------------------------------------------------------ *
  *  3 · WIRES — a cable bundle whose insulation strips back
@@ -318,9 +325,6 @@ const cables = jacketColors.map((col, i) => {
   wires.add(jacket, coreWire);
   return { jacket, delay: (i * 0.37) % 1 };
 });
-const wiresLight = new THREE.PointLight(0xff9a4d, 14, 20);
-wiresLight.position.set(-2, 5, 6);
-wires.add(wiresLight);
 
 /* ------------------------------------------------------------------ *
  *  4 · PROCESS — five gates to fly through
@@ -395,9 +399,40 @@ const orbits = [[4.1, 0.35, 0.1, GREEN], [4.8, -0.5, 0.6, CYAN], [5.5, 1.1, -0.3
   pivot.add(sat); o.add(pivot); globe.add(o);
   return { pivot, speed: 0.5 - i * 0.12 };
 });
-const globeLight = new THREE.PointLight(CYAN, 80, 24);
-globeLight.position.set(5, 4, 6);
-globe.add(globeLight);
+
+/* Scrap drifting between the stations, so the flight is never through empty space */
+{
+  const legs = [P.hero, P.metals, P.pcb, P.wires, P.gate(0)];
+  [scrapGeos[0], scrapGeos[1], scrapGeos[4]].forEach((geo) => {
+    const n = 90, mesh = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color: 0x9a9a9a, metalness: 0.85, roughness: 0.6 }), n);
+    for (let i = 0; i < n; i++) {
+      const leg = (Math.random() * (legs.length - 1)) | 0, f = rand(0.12, 0.88), a = rand(0, 6.28), rad = rand(4, 13);
+      dummy.position.lerpVectors(legs[leg], legs[leg + 1], f);
+      dummy.position.x += Math.cos(a) * rad; dummy.position.y += Math.sin(a) * rad * 0.6; dummy.position.z += rand(-3, 3);
+      dummy.rotation.set(rand(0, 6.28), rand(0, 6.28), rand(0, 6.28));
+      dummy.scale.setScalar(rand(1.2, 3.4));
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+      mesh.setColorAt(i, scrapColors[(Math.random() * scrapColors.length) | 0]);
+    }
+    dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(1);
+    mesh.frustumCulled = false;
+    scene.add(mesh);
+  });
+}
+
+/* One light that travels with the camera from station to station */
+const roam = new THREE.PointLight(GREEN, 26, 26);
+scene.add(roam);
+const lightStops = [
+  [P.hero, GREEN, 26],
+  [P.metals.clone().add(new THREE.Vector3(-3, 3.5, 4)), 0xffa25c, 30],
+  [P.pcb.clone().add(new THREE.Vector3(0, 4, 3)), GREEN, 50],
+  [P.wires.clone().add(new THREE.Vector3(-2, 5, 6)), 0xff9a4d, 16],
+  ...[0, 1, 2, 3, 4].map((k) => [P.gate(k).clone().add(new THREE.Vector3(0, 0, 3)), CYAN, 8]),
+  [P.globe.clone().add(new THREE.Vector3(5, 4, 6)), CYAN, 80],
+  [P.globe.clone().add(new THREE.Vector3(5, 4, 6)), CYAN, 80],
+].map(([pos, col, power]) => ({ pos, col: new THREE.Color(col), power }));
 
 /* Ambient dust along the whole route */
 {
@@ -411,17 +446,20 @@ globe.add(globeLight);
  * ------------------------------------------------------------------ */
 // side: +1 → subject sits right of frame (text on the left), -1 → left, 0 → centred
 const stops = [
-  { c: P.hero, off: [0, 0.5, 12.5], side: 1, shift: 5 },
-  { c: P.metals, off: [-1.5, 2.6, 9], side: -1, shift: 2.6 },
-  { c: P.pcb, off: [2, 4.4, 6], side: 1, shift: 2.3 },
-  { c: P.wires, off: [0, 1.2, 10], side: -1, shift: 2.8 },
+  { c: P.hero, off: [0, 0.5, 13], side: 1, ndc: 0.52 },
+  { c: P.metals, off: [-1.5, 2.6, 9], side: -1, ndc: 0.4 },
+  { c: P.pcb, off: [2.4, 5.4, 7.8], side: 1, ndc: 0.36 },
+  { c: P.wires, off: [0, 1.2, 10], side: -1, ndc: 0.42 },
   ...[0, 1, 2, 3, 4].map((k) => ({ c: P.gate(k), off: [k % 2 ? -0.9 : 0.9, 0.2, 7.5], look: [k % 2 ? 1.2 : -1.2, 0, -12] })),
-  { c: P.globe, off: [0, 1.5, 16], side: 1, shift: 4.6 },
-  { c: P.globe, off: [0, 1.5, 9.5], side: 0, shift: 0 },
+  { c: P.globe, off: [0, 1.5, 16], side: 1, ndc: 0.46 },
+  { c: P.globe, off: [0, 1.5, 9.5], side: 0, ndc: 0 },
 ];
 let camCurve, lookCurve, portrait = null;
 function buildRoute() {
   const cams = [], looks = [];
+  // narrower windows pull the camera back and shift the subject less, so it stays clear of the text
+  const tanF = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const back = clamp(1.7 / camera.aspect, 1, 1.5);
   stops.forEach((s) => {
     const off = new THREE.Vector3(...s.off);
     if (s.look) {
@@ -431,28 +469,36 @@ function buildRoute() {
       cams.push(s.c.clone().add(off.multiplyScalar(1.25)));
       looks.push(s.c.clone().add(new THREE.Vector3(0, s.side ? -2.4 : 0, 0)));
     } else {
+      off.multiplyScalar(back);
       cams.push(s.c.clone().add(off));
-      looks.push(s.c.clone().add(new THREE.Vector3(-s.side * s.shift, 0, 0)));
+      looks.push(s.c.clone().add(new THREE.Vector3(-s.side * s.ndc * off.length() * tanF * camera.aspect, 0, 0)));
     }
   });
   camCurve = new THREE.CatmullRomCurve3(cams, false, 'centripetal');
   lookCurve = new THREE.CatmullRomCurve3(looks, false, 'centripetal');
 }
 
-function resize() {
-  const w = innerWidth, h = innerHeight, p = w / h < 0.9;
+let lastW = 0, lastH = 0;
+function resize(force) {
+  const w = innerWidth, h = canvas.clientHeight || innerHeight;
+  // phones fire resize whenever the address bar slides; that is not worth a full re-layout
+  if (force !== true && touch && w === lastW && Math.abs(h - lastH) < 160) return;
+  lastW = w; lastH = h;
+  portrait = w <= 900 || w / h < 0.9;
+  renderer.setPixelRatio(pixelRatio());
   renderer.setSize(w, h, false);
   composer.setPixelRatio(renderer.getPixelRatio());
   composer.setSize(w, h);
+  bloom.setSize((w * renderer.getPixelRatio()) / 2, (h * renderer.getPixelRatio()) / 2);
   camera.aspect = w / h;
-  camera.fov = p ? 66 : 45;
+  camera.fov = portrait ? 66 : 45;
   camera.updateProjectionMatrix();
-  if (p !== portrait) { portrait = p; buildRoute(); }
+  buildRoute();
   measure();
 }
 addEventListener('resize', resize);
 new ResizeObserver(measure).observe(document.body);
-resize();
+resize(true);
 
 const mouse = new THREE.Vector2(), mouseS = new THREE.Vector2();
 const cursor = $('#cursor');
@@ -468,13 +514,13 @@ const N = stops.length;
 const clock = new THREE.Clock();
 const progressBar = $('#progress-bar');
 const camPos = new THREE.Vector3(), lookPos = new THREE.Vector3();
-let t = scrollT(), intro = 0, started = false, lastT = -1, velocity = 0;
+let t = scrollT(), intro = 0, started = false, lastT = -1, velocity = 0, slow = 0;
 
 function frame() {
   const dt = Math.min(clock.getDelta(), 0.05), time = clock.elapsedTime;
   const target = scrollT();
   const prev = t;
-  t = reducedMotion ? target : t + (target - t) * (1 - Math.exp(-dt * 4.5));
+  t = reducedMotion ? target : t + (target - t) * (1 - Math.exp(-dt * 7));
   velocity += ((t - prev) / Math.max(dt, 1e-3) - velocity) * 0.1;
   if (started) intro = Math.min(1, intro + dt / 2.6);
   const L = (i) => t - i;
@@ -489,6 +535,14 @@ function frame() {
   camera.lookAt(lookPos);
   camera.rotateZ(clamp(velocity, -2, 2) * -0.012);
   bloom.strength = 0.42 + Math.min(Math.abs(velocity), 2) * 0.1;
+
+  /* travelling light */
+  {
+    const i = clamp(Math.floor(t), 0, N - 2), f = clamp(t - i), a = lightStops[i], b = lightStops[i + 1];
+    roam.position.lerpVectors(a.pos, b.pos, f);
+    roam.color.lerpColors(a.col, b.col, f);
+    roam.intensity = a.power + (b.power - a.power) * f;
+  }
 
   /* hero */
   hero.visible = L(0) < 1.4;
@@ -578,12 +632,20 @@ function frame() {
   }
 
   composer.render();
+
+  /* drop render resolution a step if the device can't keep up */
+  if (started && quality < QUALITY.length - 1) {
+    slow = dt > 1 / 40 ? slow + dt : Math.max(0, slow - dt * 2);
+    if (slow > 1.2) { slow = 0; quality++; resize(true); }
+  }
 }
 
 /* ------------------------------------------------------------------ *
  *  Boot
  * ------------------------------------------------------------------ */
-frame(); // compile shaders behind the loader
+// compile every shader and upload every mesh behind the loader, so nothing hitches mid-scroll
+renderer.compile(scene, camera);
+frame();
 const loaderNum = $('#loader-num');
 const bootAt = performance.now();
 (function boot(now) {
