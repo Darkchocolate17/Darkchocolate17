@@ -200,21 +200,20 @@ const scrapGeos = [
 const scrapColors = Object.values(METALS).map((c) => new THREE.Color(c));
 const SCRAP_PER = 95;
 const dummy = new THREE.Object3D();
-const scrap = scrapGeos.map((geo) => {
+const tmpM = new THREE.Matrix4();
+const vortexItems = (n, sMin, sMax) => Array.from({ length: n }, () => ({
+  a: rand(0, Math.PI * 2), r: rand(2.6, 4.8), y: rand(-2.6, 2.6) * rand(0.3, 1),
+  sp: rand(0.05, 0.22), spin: new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)),
+  s: rand(sMin, sMax), ph: rand(0, 6.28),
+}));
+// each entry: { parts: [{ mesh: InstancedMesh, local: Matrix4|null }], items }
+let scrap = scrapGeos.map((geo) => {
   const mesh = new THREE.InstancedMesh(geo, metal(0xffffff, 0.34), SCRAP_PER);
-  const items = [];
-  for (let i = 0; i < SCRAP_PER; i++) {
-    items.push({
-      a: rand(0, Math.PI * 2), r: rand(2.6, 4.8), y: rand(-2.6, 2.6) * rand(0.3, 1),
-      sp: rand(0.05, 0.22), spin: new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)),
-      s: rand(0.6, 1.9), ph: rand(0, 6.28),
-    });
-    mesh.setColorAt(i, scrapColors[(Math.random() * scrapColors.length) | 0]);
-  }
+  for (let i = 0; i < SCRAP_PER; i++) mesh.setColorAt(i, scrapColors[(Math.random() * scrapColors.length) | 0]);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   mesh.frustumCulled = false;
   hero.add(mesh);
-  return { mesh, items };
+  return { parts: [{ mesh, local: null }], items: vortexItems(SCRAP_PER, 0.6, 1.9) };
 });
 
 /* ------------------------------------------------------------------ *
@@ -231,6 +230,8 @@ plinthRing.rotation.x = Math.PI / 2;
 plinthRing.position.y = -0.3;
 metals.add(plinth, plinthRing);
 
+const ingotProc = new THREE.Group();
+metals.add(ingotProc);
 const ingotGeo = ingotGeometry();
 const layerMetals = [METALS.steel, METALS.aluminium, METALS.brass, METALS.copper];
 const ingots = [];
@@ -241,7 +242,7 @@ for (let layer = 0; layer < 4; layer++) {
     const m = new THREE.Mesh(ingotGeo, mat);
     m.userData.home = new THREE.Vector3(0, layer * 0.57, (i - (n - 1) / 2) * 1.02);
     m.userData.spin = rand(-2, 2);
-    metals.add(m);
+    ingotProc.add(m);
     ingots.push(m);
   }
 }
@@ -258,7 +259,9 @@ const copperPlane = new THREE.Mesh(new THREE.BoxGeometry(BW, 0.04, BD), metal(ME
 const board = new THREE.Mesh(new THREE.BoxGeometry(BW, 0.12, BD), new THREE.MeshStandardMaterial({ color: 0x0a4a2a, roughness: 0.45, metalness: 0.25 }));
 const traceLayer = new THREE.Group();
 const compLayer = new THREE.Group();
-pcb.add(copperPlane, board, traceLayer, compLayer);
+const pcbProc = new THREE.Group();
+pcbProc.add(copperPlane, board, traceLayer, compLayer);
+pcb.add(pcbProc);
 
 const traceMat = new THREE.MeshStandardMaterial({ color: 0xd9a520, metalness: 1, roughness: 0.3, emissive: 0xffa200, emissiveIntensity: 0.8 });
 const TRACES = 90;
@@ -310,6 +313,8 @@ for (let i = 0; i < 12; i++) {
 const wires = new THREE.Group();
 wires.position.copy(P.wires);
 scene.add(wires);
+const cableProc = new THREE.Group();
+wires.add(cableProc);
 const jacketColors = [0xd62f2f, 0x1f5fd6, 0xe8c21a, 0x1a1c1e, 0x1fa85a, 0xe8e8e8, 0xd6641f];
 const TUBE_SEG = 220, RAD_SEG = 12;
 const cables = jacketColors.map((col, i) => {
@@ -322,7 +327,7 @@ const cables = jacketColors.map((col, i) => {
   const curve = new THREE.CatmullRomCurve3(pts);
   const jacket = new THREE.Mesh(new THREE.TubeGeometry(curve, TUBE_SEG, 0.17, RAD_SEG), new THREE.MeshStandardMaterial({ color: col, roughness: 0.55, metalness: 0.05 }));
   const coreWire = new THREE.Mesh(new THREE.TubeGeometry(curve, TUBE_SEG, 0.095, 8), metal(0xd9824a, 0.28, { emissive: 0xff6a1a, emissiveIntensity: 0.12 }));
-  wires.add(jacket, coreWire);
+  cableProc.add(jacket, coreWire);
   return { jacket, delay: (i * 0.37) % 1 };
 });
 
@@ -401,25 +406,26 @@ const orbits = [[4.1, 0.35, 0.1, GREEN], [4.8, -0.5, 0.6, CYAN], [5.5, 1.1, -0.3
 });
 
 /* Scrap drifting between the stations, so the flight is never through empty space */
-{
-  const legs = [P.hero, P.metals, P.pcb, P.wires, P.gate(0)];
-  [scrapGeos[0], scrapGeos[1], scrapGeos[4]].forEach((geo) => {
-    const n = 90, mesh = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color: 0x9a9a9a, metalness: 0.85, roughness: 0.6 }), n);
-    for (let i = 0; i < n; i++) {
-      const leg = (Math.random() * (legs.length - 1)) | 0, f = rand(0.12, 0.88), a = rand(0, 6.28), rad = rand(4, 13);
-      dummy.position.lerpVectors(legs[leg], legs[leg + 1], f);
-      dummy.position.x += Math.cos(a) * rad; dummy.position.y += Math.sin(a) * rad * 0.6; dummy.position.z += rand(-3, 3);
-      dummy.rotation.set(rand(0, 6.28), rand(0, 6.28), rand(0, 6.28));
-      dummy.scale.setScalar(rand(1.2, 3.4));
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-      mesh.setColorAt(i, scrapColors[(Math.random() * scrapColors.length) | 0]);
-    }
-    dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(1);
-    mesh.frustumCulled = false;
-    scene.add(mesh);
-  });
+const legs = [P.hero, P.metals, P.pcb, P.wires, P.gate(0)];
+let debris = [];
+function scatter(parts, n, sMin, sMax) {
+  for (let i = 0; i < n; i++) {
+    const leg = (Math.random() * (legs.length - 1)) | 0, f = rand(0.12, 0.88), a = rand(0, 6.28), rad = rand(4, 13);
+    dummy.position.lerpVectors(legs[leg], legs[leg + 1], f);
+    dummy.position.x += Math.cos(a) * rad; dummy.position.y += Math.sin(a) * rad * 0.6; dummy.position.z += rand(-3, 3);
+    dummy.rotation.set(rand(0, 6.28), rand(0, 6.28), rand(0, 6.28));
+    dummy.scale.setScalar(rand(sMin, sMax));
+    dummy.updateMatrix();
+    for (const { mesh, local } of parts) mesh.setMatrixAt(i, local ? tmpM.multiplyMatrices(dummy.matrix, local) : dummy.matrix);
+  }
+  dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(1);
+  for (const { mesh } of parts) { mesh.frustumCulled = false; scene.add(mesh); debris.push(mesh); }
 }
+[scrapGeos[0], scrapGeos[1], scrapGeos[4]].forEach((geo) => {
+  const n = 90, mesh = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color: 0x9a9a9a, metalness: 0.85, roughness: 0.6 }), n);
+  for (let i = 0; i < n; i++) mesh.setColorAt(i, scrapColors[(Math.random() * scrapColors.length) | 0]);
+  scatter([{ mesh, local: null }], n, 1.2, 3.4);
+});
 
 /* One light that travels with the camera from station to station */
 const roam = new THREE.PointLight(GREEN, 26, 26);
@@ -439,6 +445,93 @@ const lightStops = [
   const pos = [];
   for (let i = 0; i < 5000; i++) pos.push(rand(-34, 34), rand(-16, 16), rand(-215, 16));
   scene.add(points(pos, { size: 0.07, color: 0x8fffd0, opacity: 0.45 }));
+}
+
+/* ------------------------------------------------------------------ *
+ *  Real 3D models (optional) — listed in models/models.json.
+ *  Each one replaces the built-in stand-in for its slot once it has loaded;
+ *  with no models listed, nothing extra is downloaded.
+ * ------------------------------------------------------------------ */
+const real = {};
+function fitted(gltf, size) {
+  const src = gltf.scene;
+  src.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(src), dim = box.getSize(new THREE.Vector3());
+  const k = size / Math.max(dim.x, dim.y, dim.z, 1e-6);
+  src.position.sub(box.getCenter(new THREE.Vector3()));
+  const root = new THREE.Group();
+  root.add(src);
+  root.scale.setScalar(k);
+  root.userData.height = dim.y * k;
+  return root;
+}
+function place(root, cfg) {
+  if (cfg.rotation) root.rotation.set(...cfg.rotation.map(THREE.MathUtils.degToRad));
+  if (cfg.offset) root.position.add(new THREE.Vector3(...cfg.offset));
+}
+function instancedParts(gltf, cfg, count, size) {
+  const root = fitted(gltf, size);
+  place(root, { rotation: cfg.rotation });
+  root.updateMatrixWorld(true);
+  const parts = [];
+  root.traverse((o) => {
+    if (o.isMesh && !o.isSkinnedMesh) parts.push({ mesh: new THREE.InstancedMesh(o.geometry, o.material, count), local: o.matrixWorld.clone() });
+  });
+  return parts;
+}
+async function loadModels() {
+  let list;
+  try {
+    const res = await fetch('models/models.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    list = await res.json();
+  } catch { return; }
+  const scrapList = (list.scrap || []).filter((m) => m && m.file);
+  const slots = ['metals', 'pcb', 'wires'].filter((k) => list[k] && list[k].file);
+  if (!scrapList.length && !slots.length) return;
+
+  const [{ GLTFLoader }, { DRACOLoader }, { MeshoptDecoder }] = await Promise.all([
+    import('three/addons/loaders/GLTFLoader.js'),
+    import('three/addons/loaders/DRACOLoader.js'),
+    import('three/addons/libs/meshopt_decoder.module.js'),
+  ]);
+  const loader = new GLTFLoader().setPath('models/');
+  loader.setDRACOLoader(new DRACOLoader().setDecoderPath('vendor/draco/'));
+  loader.setMeshoptDecoder(MeshoptDecoder);
+  const load = (cfg) => loader.loadAsync(cfg.file).catch((err) => { console.warn(`Model ${cfg.file} failed to load; keeping the built-in object.`, err); return null; });
+
+  // centrepieces
+  const stage = { metals: [metals, ingotProc, 4.2], pcb: [pcb, pcbProc, 6.4], wires: [wires, cableProc, 7] };
+  slots.forEach(async (slot) => {
+    const cfg = list[slot], gltf = await load(cfg);
+    if (!gltf) return;
+    const [group, standIn, size] = stage[slot];
+    const root = fitted(gltf, cfg.size ?? size);
+    if (slot === 'metals') root.position.y = -0.3 + root.userData.height / 2; // rest on the plinth
+    place(root, cfg);
+    standIn.visible = false;
+    group.add(root);
+    real[slot] = { root, y: root.position.y };
+  });
+
+  // loose scrap: the hero vortex and the pieces drifting along the route
+  const loaded = (await Promise.all(scrapList.map(async (cfg) => ({ cfg, gltf: await load(cfg) })))).filter((m) => m.gltf);
+  if (!loaded.length) return;
+  scrap.forEach(({ parts }) => parts.forEach(({ mesh }) => hero.remove(mesh)));
+  debris.forEach((mesh) => scene.remove(mesh));
+  debris = [];
+  scrap = loaded.map(({ cfg, gltf }) => {
+    // detailed models get fewer copies: about 200k triangles of loose scrap in total unless a count is given
+    let tris = 0;
+    gltf.scene.traverse((o) => { if (o.isMesh) tris += (o.geometry.index || o.geometry.attributes.position).count / 3; });
+    const auto = clamp(Math.round(200000 / loaded.length / Math.max(tris, 1) / 1.5), 4, 120);
+    const count = Math.max(1, Math.round(cfg.count ?? auto)), size = cfg.size ?? 0.8;
+    const parts = instancedParts(gltf, cfg, count, size);
+    parts.forEach(({ mesh }) => { mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); mesh.frustumCulled = false; hero.add(mesh); });
+    const n = Math.max(1, Math.round(count / 2));
+    scatter(instancedParts(gltf, cfg, n, size), n, 1.5, 3.2);
+    return { parts, items: vortexItems(count, 0.7, 1.4) };
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -554,7 +647,7 @@ function frame() {
     core.rotation.set(time * 0.2, time * 0.3, 0);
     coreGlow.scale.setScalar(1 + Math.sin(time * 2.2) * 0.12);
     hero.scale.setScalar(0.6 + 0.4 * open);
-    for (const { mesh, items } of scrap) {
+    for (const { parts, items } of scrap) {
       for (let i = 0; i < items.length; i++) {
         const it = items[i], a = it.a + time * it.sp + burst * 1.5;
         const r = it.r * (1 + (1 - open) * 2.5 + burst * 1.6);
@@ -562,9 +655,9 @@ function frame() {
         dummy.rotation.set(it.spin.x * time + it.ph, it.spin.y * time, it.spin.z * time);
         dummy.scale.setScalar(it.s);
         dummy.updateMatrix();
-        mesh.setMatrixAt(i, dummy.matrix);
+        for (const { mesh, local } of parts) mesh.setMatrixAt(i, local ? tmpM.multiplyMatrices(dummy.matrix, local) : dummy.matrix);
       }
-      mesh.instanceMatrix.needsUpdate = true;
+      for (const { mesh } of parts) mesh.instanceMatrix.needsUpdate = true;
     }
   }
 
@@ -573,7 +666,11 @@ function frame() {
   if (metals.visible) {
     const p = smooth(-0.75, 0.05, L(1));
     metals.rotation.y = 0.6 + L(1) * 0.7 + time * 0.06;
-    ingots.forEach((m, i) => {
+    if (real.metals) {
+      const k = easeOut(p * 1.2), m = real.metals;
+      m.root.position.y = m.y + (1 - k) * 7;
+      m.root.visible = k > 0.001;
+    } else ingots.forEach((m, i) => {
       const k = easeOut(p * (ingots.length + 4) / 5 - i / 5), h = m.userData.home;
       m.position.set(h.x, h.y + (1 - k) * 9, h.z);
       m.rotation.set((1 - k) * m.userData.spin, (1 - k) * m.userData.spin * 0.7, 0);
@@ -590,14 +687,16 @@ function frame() {
     traceLayer.position.y = 0.07 + e * 0.9;
     compLayer.position.y = 0.06 + e * 2.0;
     traceMat.emissiveIntensity = 0.7 + Math.sin(time * 2.4) * 0.35 + e * 0.8;
+    if (real.pcb) real.pcb.root.position.y = real.pcb.y + Math.sin(time * 0.8) * 0.08;
   }
 
   /* wires */
   wires.visible = Math.abs(L(3)) < 1.4;
   if (wires.visible) {
     const s = smooth(-0.5, 0.35, L(3));
-    wires.rotation.set(time * 0.12 + L(3) * 1.2, 0.25, 0);
-    for (const { jacket, delay } of cables) {
+    if (real.wires) wires.rotation.set(0.15, time * 0.2 + L(3) * 1.2, 0);
+    else wires.rotation.set(time * 0.12 + L(3) * 1.2, 0.25, 0);
+    if (!real.wires) for (const { jacket, delay } of cables) {
       const k = clamp(s * 1.5 - delay * 0.5) * 0.62;
       const cut = Math.floor(TUBE_SEG * k) * RAD_SEG * 6;
       jacket.geometry.setDrawRange(cut, TUBE_SEG * RAD_SEG * 6 - cut);
@@ -654,6 +753,7 @@ const bootAt = performance.now();
   if (k < 1) return requestAnimationFrame(boot);
   document.body.classList.remove('loading');
   started = true;
+  loadModels();
   measure();
   clock.getDelta();
   renderer.setAnimationLoop(frame);
