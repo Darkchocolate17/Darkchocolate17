@@ -25,6 +25,7 @@ Then open http://localhost:8000. Any static host (GitHub Pages, Netlify, Vercel)
 
 - **Name, copy, facts** — `index.html`
 - **Colours and type** — the variables at the top of `css/style.css`
+- **Background theme** — deep green by default; `night`, `dusk` and `daylight` are also built in. Change the default in the small script at the top of `index.html`, or preview one with `?theme=name`
 - **Contact email** — `CONTACT_EMAIL` at the top of `js/main.js` (the form opens the visitor's email app; swap in a form backend if you prefer)
 - **3D scene and camera route** — `js/main.js`
 - **Real 3D models** — drop `.glb` files in `models/` and list them in `models/models.json`; see `models/README.md`

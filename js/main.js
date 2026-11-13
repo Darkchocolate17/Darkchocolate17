@@ -138,7 +138,7 @@ const THEMES = {
   forest:   { sky: ['#041c14', '#0c3a28', '#06241a'], glow: ['rgba(120,255,180,.2)', 0.68, 0.3],  fog: 0x0a3122, haze: 0.019, env: 0.6,  bloom: 0.4,  threshold: 0.95, dust: 0xbfffe0, additive: true,  exposure: 1.05 },
   daylight: { sky: ['#f4f6f3', '#e6ebe6', '#c9d3cc'], glow: ['rgba(255,255,255,.7)', 0.66, 0.35], fog: 0xdfe6e0, haze: 0.016, env: 1.05, bloom: 0.12, threshold: 1.2,  dust: 0x4c6a5c, additive: false, exposure: 0.95 },
 };
-const theme = THEMES[window.SITE_THEME] || THEMES.night;
+const theme = THEMES[window.SITE_THEME] || THEMES.forest;
 function skyTexture({ sky, glow }) {
   const c = document.createElement('canvas'); c.width = c.height = 512;
   const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 512);
@@ -415,7 +415,7 @@ globe.add(planet);
     pos.push(x * 3, y * 3, z * 3); col.push(c.r, c.g, c.b);
   }
   planet.add(points(pos, { size: 0.07, opacity: 0.95 }, col));
-  planet.add(new THREE.Mesh(new THREE.SphereGeometry(2.94, 48, 48), new THREE.MeshBasicMaterial({ color: 0x030a0c })));
+  planet.add(new THREE.Mesh(new THREE.SphereGeometry(2.94, 48, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(theme.fog).multiplyScalar(theme.additive ? 0.3 : 0.12) })));
 }
 const orbits = [[4.1, 0.35, 0.1, GREEN], [4.8, -0.5, 0.6, CYAN], [5.5, 1.1, -0.3, ORANGE]].map(([r, rx, rz, col], i) => {
   const o = new THREE.Group();
