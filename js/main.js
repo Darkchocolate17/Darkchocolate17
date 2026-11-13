@@ -130,20 +130,43 @@ let quality = 0;
 const pixelRatio = () => Math.min(devicePixelRatio, QUALITY[quality]);
 renderer.setPixelRatio(pixelRatio());
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+
+/* Background themes — the sky gradient, haze and particle look for each one */
+const THEMES = {
+  night:    { sky: ['#04070a', '#04070a', '#04070a'], glow: null,                        fog: 0x04070a, haze: 0.022, env: 0.42, bloom: 0.42, threshold: 0.92, dust: 0x8fffd0, additive: true,  exposure: 1.05 },
+  dusk:     { sky: ['#06141c', '#0e2c33', '#4a2a1c'], glow: ['rgba(255,150,80,.28)', 0.72, 0.9],  fog: 0x10282d, haze: 0.019, env: 0.6,  bloom: 0.4,  threshold: 0.95, dust: 0xffd9b0, additive: true,  exposure: 1.05 },
+  forest:   { sky: ['#041c14', '#0c3a28', '#06241a'], glow: ['rgba(120,255,180,.2)', 0.68, 0.3],  fog: 0x0a3122, haze: 0.019, env: 0.6,  bloom: 0.4,  threshold: 0.95, dust: 0xbfffe0, additive: true,  exposure: 1.05 },
+  daylight: { sky: ['#f4f6f3', '#e6ebe6', '#c9d3cc'], glow: ['rgba(255,255,255,.7)', 0.66, 0.35], fog: 0xdfe6e0, haze: 0.016, env: 1.05, bloom: 0.12, threshold: 1.2,  dust: 0x4c6a5c, additive: false, exposure: 0.95 },
+};
+const theme = THEMES[window.SITE_THEME] || THEMES.night;
+function skyTexture({ sky, glow }) {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 512);
+  g.addColorStop(0, sky[0]); g.addColorStop(0.55, sky[1]); g.addColorStop(1, sky[2]);
+  x.fillStyle = g; x.fillRect(0, 0, 512, 512);
+  if (glow) {
+    const [col, gx, gy] = glow, rg = x.createRadialGradient(gx * 512, gy * 512, 0, gx * 512, gy * 512, 330);
+    rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = rg; x.fillRect(0, 0, 512, 512);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+renderer.toneMappingExposure = theme.exposure;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x04070a);
-scene.fog = new THREE.FogExp2(0x04070a, 0.022);
+scene.background = theme.glow ? skyTexture(theme) : new THREE.Color(theme.fog);
+scene.fog = new THREE.FogExp2(theme.fog, theme.haze);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.42;
+scene.environmentIntensity = theme.env;
 
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 220);
 
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: touch ? 0 : 2 }));
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.42, 0.6, 0.92);
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), theme.bloom, 0.6, theme.threshold);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
@@ -363,7 +386,7 @@ function points(positions, opts, colors) {
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   if (colors) g.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-  return new THREE.Points(g, new THREE.PointsMaterial({ map: dotTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: !!colors, ...opts }));
+  return new THREE.Points(g, new THREE.PointsMaterial({ map: dotTex, transparent: true, depthWrite: false, blending: theme.additive ? THREE.AdditiveBlending : THREE.NormalBlending, vertexColors: !!colors, ...opts }));
 }
 {
   const pos = [];
@@ -371,7 +394,7 @@ function points(positions, opts, colors) {
     const a = rand(0, 6.28), r = rand(2.2, 6.5);
     pos.push(Math.cos(a) * r, Math.sin(a) * r, rand(-170, -106));
   }
-  tunnel.add(points(pos, { size: 0.09, color: 0x9fffe0, opacity: 0.8 }));
+  tunnel.add(points(pos, { size: 0.09, color: theme.additive ? 0x9fffe0 : theme.dust, opacity: 0.8 }));
 }
 
 /* ------------------------------------------------------------------ *
@@ -444,7 +467,7 @@ const lightStops = [
 {
   const pos = [];
   for (let i = 0; i < 5000; i++) pos.push(rand(-34, 34), rand(-16, 16), rand(-215, 16));
-  scene.add(points(pos, { size: 0.07, color: 0x8fffd0, opacity: 0.45 }));
+  scene.add(points(pos, { size: 0.07, color: theme.dust, opacity: 0.45 }));
 }
 
 /* ------------------------------------------------------------------ *
@@ -627,7 +650,7 @@ function frame() {
   camera.translateX(mouseS.x * 0.5); camera.translateY(-mouseS.y * 0.35);
   camera.lookAt(lookPos);
   camera.rotateZ(clamp(velocity, -2, 2) * -0.012);
-  bloom.strength = 0.42 + Math.min(Math.abs(velocity), 2) * 0.1;
+  bloom.strength = theme.bloom + Math.min(Math.abs(velocity), 2) * 0.1;
 
   /* travelling light */
   {

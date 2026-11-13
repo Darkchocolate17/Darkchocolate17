@@ -11,6 +11,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<script>
+  // Background theme: "night" (default), "dusk", "forest" or "daylight". Preview any with ?theme=name
+  window.SITE_THEME = new URLSearchParams(location.search).get('theme') || 'night';
+  document.documentElement.dataset.theme = window.SITE_THEME;
+</script>
 <script type="importmap">
 { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
 </script>
