@@ -1,4 +1,4 @@
-# Deep Field — space comic for Instagram
+# Panels from Space — space comic for Instagram (@panelsfromspace)
 
 True space stories told as comic carousels, narrated by Ori the drone.
 All art is drawn in code (HTML, SVG, canvas), so there are no image-generation costs.
