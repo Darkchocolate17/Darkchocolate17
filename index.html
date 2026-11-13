@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Second Ore Renewables — Metal, PCB &amp; Wire Recycling</title>
+<meta name="description" content="Second Ore Renewables recovers copper, aluminium, steel and precious metals from metal scrap, printed circuit boards and cable.">
+<meta name="theme-color" content="#04070a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%233dffa2' stroke-width='4' stroke-dasharray='52 17'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
+</script>
+</head>
+<body class="loading">
+
+<!-- Loader -->
+<div id="loader" aria-hidden="true">
+  <svg class="loader-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/><circle class="arc" cx="50" cy="50" r="44"/></svg>
+  <div class="loader-pct"><span id="loader-num">0</span>%</div>
+  <div class="loader-label">Melting down the old world</div>
+</div>
+
+<!-- 3D stage -->
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div id="cursor" aria-hidden="true"></div>
+
+<!-- Chrome -->
+<header class="top">
+  <a class="brand" href="#hero" aria-label="Second Ore Renewables home">
+    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="3.5" stroke-dasharray="52 17" stroke-linecap="round"/></svg>
+    <span>Second Ore<em>Renewables</em></span>
+  </a>
+  <nav aria-label="Primary">
+    <a href="#metals">Metals</a>
+    <a href="#pcbs">PCBs</a>
+    <a href="#wires">Wires</a>
+    <a href="#process">Process</a>
+    <a href="#impact">Impact</a>
+  </nav>
+  <a class="btn btn-sm" href="#contact">Get a quote</a>
+</header>
+
+<aside class="rail" aria-hidden="true">
+  <div class="rail-count"><b id="rail-now">01</b><i></i><span>07</span></div>
+  <div class="rail-dots" id="rail-dots"></div>
+  <div class="rail-name" id="rail-name">Intro</div>
+</aside>
+<div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
+
+<main>
+  <!-- 0 · HERO -->
+  <section class="chapter hero" id="hero" data-key data-chapter="0" data-name="Intro">
+    <div class="panel bare left">
+      <p class="eyebrow reveal">Metal scrap · Circuit boards · Cable</p>
+      <h1 class="reveal">Nothing is waste.<br><span class="grad">Everything is ore.</span></h1>
+      <p class="lede reveal">We take what the world throws away — scrap metal, dead electronics, miles of old wire — and return it as pure, furnace-ready material. Scroll to follow a tonne of scrap through the loop.</p>
+      <div class="cta-row reveal">
+        <a class="btn" href="#contact">Sell your scrap</a>
+        <a class="btn ghost" href="#metals">Take the tour</a>
+      </div>
+    </div>
+    <div class="scroll-hint" aria-hidden="true"><i></i>Scroll</div>
+  </section>
+
+  <!-- 1 · METALS -->
+  <section class="chapter" id="metals" data-key data-chapter="1" data-name="Metal scrap">
+    <div class="panel right">
+      <p class="eyebrow reveal"><b>01</b> Metal scrap</p>
+      <h2 class="reveal">From tangled scrap to clean ingots.</h2>
+      <p class="reveal">Ferrous or non-ferrous, loose or baled — we weigh it, grade it and pay on the spot. Every load is sorted by alloy with handheld XRF, sheared, shredded and melted into certified ingots ready for the foundry.</p>
+      <ul class="chips reveal">
+        <li>Copper</li><li>Aluminium</li><li>Brass</li><li>Stainless</li><li>Steel</li><li>Lead</li><li>Zinc</li>
+      </ul>
+      <div class="fact reveal"><strong>95%</strong><span>less energy to recycle aluminium than to smelt it from bauxite.</span></div>
+    </div>
+  </section>
+
+  <!-- 2 · PCBs -->
+  <section class="chapter" id="pcbs" data-key data-chapter="2" data-name="Circuit boards">
+    <div class="panel left">
+      <p class="eyebrow reveal"><b>02</b> Printed circuit boards</p>
+      <h2 class="reveal">An urban mine, layer by layer.</h2>
+      <p class="reveal">A circuit board is the richest ore on earth. We depopulate components, shred the laminate and separate it into copper, precious-metal concentrate and inert glass fibre — with full data destruction and a documented chain of custody.</p>
+      <ul class="chips gold reveal">
+        <li>Gold</li><li>Silver</li><li>Palladium</li><li>Copper</li><li>Tin</li><li>Tantalum</li>
+      </ul>
+      <div class="fact words reveal"><strong>Richer than ore</strong><span>Tonne for tonne, circuit boards carry far more gold than the rock that is mined for it.</span></div>
+    </div>
+  </section>
+
+  <!-- 3 · WIRES -->
+  <section class="chapter" id="wires" data-key data-chapter="3" data-name="Wire &amp; cable">
+    <div class="panel right">
+      <p class="eyebrow reveal"><b>03</b> Wire &amp; cable</p>
+      <h2 class="reveal">Strip the jacket. Keep the copper.</h2>
+      <p class="reveal">House wire, harnesses, armoured cable, data cable — we granulate it and separate the metal from the insulation by density, without burning a thing. Out comes bright copper and aluminium chop; the plastics go on to be reused too.</p>
+      <ul class="chips copper reveal">
+        <li>Power cable</li><li>Harnesses</li><li>Data cable</li><li>Armoured</li><li>Enamelled</li>
+      </ul>
+      <div class="fact reveal"><strong>∞</strong><span>Copper can be recycled again and again with no loss of conductivity.</span></div>
+    </div>
+  </section>
+
+  <!-- 4 · PROCESS -->
+  <div id="process" class="process">
+    <section class="chapter step" data-key data-chapter="4" data-name="Process">
+      <div class="panel step-card left">
+        <span class="num reveal">01</span>
+        <h3 class="reveal">Collect</h3>
+        <p class="reveal">Bins, skips and scheduled pickups from factories, workshops, demolition sites and IT rooms. Every load is weighed on a calibrated bridge.</p>
+      </div>
+    </section>
+    <section class="chapter step" data-key data-chapter="4" data-name="Process">
+      <div class="panel step-card right">
+        <span class="num reveal">02</span>
+        <h3 class="reveal">Sort</h3>
+        <p class="reveal">Magnets, eddy currents, sensors and trained hands split the stream by metal, alloy and grade.</p>
+      </div>
+    </section>
+    <section class="chapter step" data-key data-chapter="4" data-name="Process">
+      <div class="panel step-card left">
+        <span class="num reveal">03</span>
+        <h3 class="reveal">Shred</h3>
+        <p class="reveal">Shears, shredders and granulators reduce everything to a uniform size and liberate metal from plastic, glass and resin.</p>
+      </div>
+    </section>
+    <section class="chapter step" data-key data-chapter="4" data-name="Process">
+      <div class="panel step-card right">
+        <span class="num reveal">04</span>
+        <h3 class="reveal">Separate</h3>
+        <p class="reveal">Density tables, electrostatics and air classifiers pull clean copper, aluminium and precious-metal fractions out of the mix.</p>
+      </div>
+    </section>
+    <section class="chapter step" data-key data-chapter="4" data-name="Process">
+      <div class="panel step-card left">
+        <span class="num reveal">05</span>
+        <h3 class="reveal">Refine</h3>
+        <p class="reveal">Melted, assayed and cast. The metal leaves us as certified raw material — and goes straight back into things people make.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- 5 · IMPACT -->
+  <section class="chapter" id="impact" data-key data-chapter="5" data-name="Impact">
+    <div class="panel left wide">
+      <p class="eyebrow reveal"><b>04</b> Why it matters</p>
+      <h2 class="reveal">The mine of the future is above ground.</h2>
+      <div class="stats reveal">
+        <div><strong><span data-count="62">0</span> Mt</strong><span>of e-waste generated worldwide in 2022</span></div>
+        <div><strong><span data-count="22.3" data-dec="1">0</span>%</strong><span>of it documented as properly collected and recycled</span></div>
+        <div><strong><span data-count="95">0</span>%</strong><span>energy saved recycling aluminium instead of mining it</span></div>
+      </div>
+      <p class="source reveal">E-waste figures: Global E-waste Monitor 2024.</p>
+    </div>
+  </section>
+
+  <!-- 6 · CONTACT -->
+  <section class="chapter contact" id="contact" data-key data-chapter="6" data-name="Contact">
+    <div class="panel center">
+      <p class="eyebrow reveal">Close the loop</p>
+      <h2 class="reveal">Got scrap? Let’s turn it into something.</h2>
+      <form id="quote" class="reveal" novalidate>
+        <label>Name<input name="name" autocomplete="name" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Material
+          <select name="material">
+            <option>Metal scrap</option><option>Circuit boards / e-waste</option><option>Wire &amp; cable</option><option>Mixed load</option>
+          </select>
+        </label>
+        <label>Approx. quantity<input name="quantity" placeholder="e.g. 2 tonnes"></label>
+        <label class="full">Tell us about the load<textarea name="message" rows="3"></textarea></label>
+        <button class="btn full" type="submit">Request a quote</button>
+        <p class="form-note full" id="form-note" role="status"></p>
+      </form>
+    </div>
+    <footer>
+      <span>© <span id="year"></span> Second Ore Renewables</span>
+      <span>Metal · PCB · Wire recycling</span>
+      <a href="#hero">Back to top ↑</a>
+    </footer>
+  </section>
+</main>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
