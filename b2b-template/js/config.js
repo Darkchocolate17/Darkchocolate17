@@ -4,11 +4,11 @@
  * ------------------------------------------------------------------ */
 export const config = {
   /* Replaces the text of every element marked [data-brand] */
-  brand: 'Kinetiq',
+  brand: 'Northframe',
 
-  /* The demo form opens the visitor's mail app addressed here.
+  /* The enquiry form opens the visitor's mail app addressed here.
      Swap submitForm() in js/ui.js for a fetch() to your own backend. */
-  contactEmail: 'hello@kinetiq.example',
+  contactEmail: 'hello@northframe.example',
 
   /* Skins are defined in css/style.css as :root[data-skin="name"] */
   skins: ['ion', 'ember', 'circuit', 'paper'],

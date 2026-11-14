@@ -173,7 +173,16 @@ export function initUI({ onSkin } = {}) {
     });
     [...scrubs.map((s) => [s, s.host]), ...hscrolls.map((h) => [h, h.el]), ...stacks.map((s) => [s, s.el])].forEach(([o, el]) => Object.assign(o, box(el)));
     drifters.forEach((d) => { d.el.style.transform = ''; Object.assign(d, box(d.el)); });
-    if (footerWord) Object.assign(footer, box(footerWord));
+    if (footerWord) {
+      /* size the wordmark so any brand name spans the full width */
+      footerWord.style.fontSize = '';
+      const word = footerWord.firstElementChild, base = parseFloat(getComputedStyle(footerWord).fontSize);
+      if (word?.offsetWidth) {
+        const cs = getComputedStyle(word), gutters = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+        footerWord.style.fontSize = `${Math.min(base * ((scroll.vw - gutters) / Math.max(1, word.offsetWidth - gutters)), 460)}px`;
+      }
+      Object.assign(footer, box(footerWord));
+    }
     marquees.forEach(fillMarquee);
   }
 
@@ -286,7 +295,7 @@ export function initUI({ onSkin } = {}) {
     });
   }
 
-  /* ---- demo form: opens the visitor's mail app (see config.contactEmail) ---- */
+  /* ---- enquiry form: opens the visitor's mail app (see config.contactEmail) ---- */
   const form = $('#demo-form'), note = $('#form-note');
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -302,8 +311,8 @@ export function initUI({ onSkin } = {}) {
     submitForm(data);
   });
   function submitForm(data) {
-    const subject = `Demo request from ${data.name}${data.company ? `, ${data.company}` : ''}`;
-    const body = `Name: ${data.name}\nEmail: ${data.email}\nCompany: ${data.company || '-'}\nOrders a month: ${data.volume}\n\n${data.message || ''}`;
+    const subject = `Website enquiry from ${data.name}${data.company ? `, ${data.company}` : ''}`;
+    const body = `Name: ${data.name}\nEmail: ${data.email}\nCompany: ${data.company || '-'}\nInterested in: ${data.interest}\n\n${data.message || ''}`;
     note.classList.remove('error');
     note.innerHTML = `Your mail app should open with the request filled in. If it does not, write to <a href="mailto:${config.contactEmail}">${config.contactEmail}</a>`;
     window.location.href = `mailto:${config.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -406,8 +415,8 @@ export function initUI({ onSkin } = {}) {
 
     /* footer word slides sideways as it enters */
     if (footerWord && !reduced && y + vh > footer.top) {
-      const p = clamp((y + vh - footer.top) / (footer.height + vh * 0.4));
-      footerWord.style.transform = `translate3d(${lerp(14, -6, p)}%,0,0)`;
+      const p = clamp((y + vh - footer.top) / Math.max(1, scroll.max + vh - footer.top));   // reaches 1 at the very bottom
+      footerWord.style.transform = `translate3d(${lerp(12, 0, p)}%,0,0)`;
     }
 
     /* cursor */

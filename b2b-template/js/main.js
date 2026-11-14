@@ -28,6 +28,7 @@ const queueResize = () => {
 };
 window.addEventListener('resize', queueResize);
 window.addEventListener('load', queueResize);
+document.fonts?.ready.then(queueResize);                 // web fonts change text widths when they arrive
 if ('ResizeObserver' in window) new ResizeObserver(queueResize).observe($('#main'));   // fonts, accordions, late layout
 resize();
 

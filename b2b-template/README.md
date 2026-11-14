@@ -2,7 +2,7 @@
 
 A scroll-driven 3D website for a B2B company, built to be reskinned. One WebGL scene sits behind the whole page. As the visitor scrolls, 30,000 particles morph from one sculpture into the next while the copy moves through pinned, horizontal and stacking sections.
 
-The demo brand is **Kinetiq**, a fictional supply-network platform. Every name, logo and figure in it is placeholder content.
+The sample content is for a business that sells B2B website templates and supports them. The brand name **Northframe**, the prices, the timings and the plan details are placeholders to replace with your own.
 
 ## Run it
 
@@ -19,14 +19,14 @@ Then open http://localhost:8000. Any static host works as is: GitHub Pages, Netl
 | Section | 3D shape | Scroll technique |
 | --- | --- | --- |
 | Intro | Liquid orb inside a particle shell | Split-word headline, parallax copy, magnetic buttons |
-| Customers | (transition) | Marquee that speeds up and reverses with scroll direction |
+| Industries | (transition) | Marquee that speeds up and reverses with scroll direction |
 | Why | Spiral galaxy | Pinned section, words light up as you scroll |
-| Platform | Modular lattice cube | Tall section, the row nearest mid-screen comes into focus |
-| Solutions | Ribbed torus | Pinned horizontal scroll with tilt cards |
-| Network | Dotted globe with travelling arcs | Count-up stats |
+| What's inside | Modular lattice cube | Tall section, the row nearest mid-screen comes into focus |
+| Templates | Ribbed torus | Pinned horizontal scroll with tilt cards |
+| Support | Dotted globe with travelling arcs | Count-up stats |
 | Process | Double helix | Sticky cards that stack and settle back |
-| Results | Growth bar chart | Count-up stats, tilt quote card |
-| Pricing + FAQ | Rolling wave | Monthly/annual toggle, accordions |
+| Handover | Growth bar chart | Count-up stats, tilt checklist card |
+| Pricing + FAQ | Rolling wave | Tilt plan cards, accordions |
 | Contact | Trefoil knot | Validated form, giant footer wordmark that slides in |
 
 Around all of it: a loader, a custom cursor, a section rail with scroll percentage, a header that hides on the way down, four colour skins, pointer parallax, and a pointer that dents the sculpture.
@@ -35,7 +35,7 @@ Around all of it: a loader, a custom cursor, a section rail with scroll percenta
 
 ### 1. Brand and contact: `js/config.js`
 
-`brand` fills every element marked `data-brand`. `contactEmail` is where the demo form sends. Particle count, bloom and scroll smoothing are here too.
+`brand` fills every element marked `data-brand`. `contactEmail` is where the enquiry form sends. Particle count, bloom and scroll smoothing are here too.
 
 ### 2. Copy and structure: `index.html`
 
@@ -100,6 +100,7 @@ All of them are opt-in attributes, handled in `js/ui.js`.
 | `data-tilt` | 3D tilt and glare under the pointer. |
 | `data-magnetic` | Element leans toward the pointer. |
 | `data-speed="-0.16"` | Parallax drift relative to scroll. |
+| `data-bill="m"` / `data-bill="y"` buttons with `data-price-m` and `data-price-y` on a price | Optional monthly/annual price toggle. |
 
 ## Add a 3D shape
 

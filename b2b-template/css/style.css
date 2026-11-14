@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Kinetiq — immersive B2B template
+   Immersive B2B template
    Layout: one fixed WebGL stage behind a single long scroll. Each section parks
    its copy on one side so the particle sculpture owns the other.
 
@@ -322,7 +322,8 @@ main, .site-footer { position: relative; z-index: 1; }
 
 /* Results */
 .results .copy { max-width: 40rem; }
-.quote { display: grid; gap: 1.2rem; width: 100%; }
+.quote, .included { display: grid; gap: 1.2rem; width: 100%; }
+.included .checklist { padding-bottom: 0; border-bottom: 0; }
 .quote blockquote { font: 500 var(--step-1)/1.35 var(--font-display); letter-spacing: -.02em; }
 .quote figcaption { display: grid; gap: .2rem; font-size: var(--step--1); color: var(--muted); }
 .quote figcaption b { color: var(--fg); font-weight: 600; }
@@ -339,9 +340,9 @@ main, .site-footer { position: relative; z-index: 1; }
 .plan-price { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
 .plan-price strong { font: 700 clamp(2.4rem, 1.6rem + 2vw, 3.4rem)/1 var(--font-display); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
 .plan-price span, .plan-for { font-size: var(--step--1); color: var(--muted); }
-.plan ul { display: grid; gap: .6rem; padding-block: 1.1rem; border-block: 1px solid var(--line); }
-.plan li { position: relative; padding-left: 1.4rem; font-size: .95rem; }
-.plan li::before { content: ""; position: absolute; left: 0; top: .55em; width: 8px; height: 1px; background: var(--accent); }
+.checklist { display: grid; gap: .6rem; padding-block: 1.1rem; border-block: 1px solid var(--line); }
+.checklist li { position: relative; padding-left: 1.4rem; font-size: .95rem; }
+.checklist li::before { content: ""; position: absolute; left: 0; top: .55em; width: 8px; height: 1px; background: var(--accent); }
 .plan .btn { margin-top: auto; }
 
 .faq { min-height: 0; }
