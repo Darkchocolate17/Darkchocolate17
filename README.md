@@ -29,3 +29,7 @@ Then open http://localhost:8000. Any static host (GitHub Pages, Netlify, Vercel)
 - **3D scene and camera route** — `js/main.js`
 
 Three.js (MIT) is vendored in `vendor/`.
+
+## B2B template
+
+`b2b-template/` is a separate, self-contained immersive 3D site for a B2B company, built to be reskinned for other brands. See [b2b-template/README.md](b2b-template/README.md). When this repository is deployed to GitHub Pages it is served at `/b2b-template/`.
