@@ -10,6 +10,9 @@
  *  meta.roll  resting roll around the view axis (radians)
  *  meta.spin  idle rotation speed around its own vertical axis
  *  meta.extra optional scenery that fades in with the shape (see world.js)
+ *  meta.yaw   optional fixed facing instead of free spin; meta.sweep turns it
+ *             by that many radians as a tall section scrolls
+ *  meta.explode  true to spread the shape in depth as a tall section scrolls
  * ------------------------------------------------------------------ */
 const TAU = Math.PI * 2;
 const GOLDEN = Math.PI * (3 - Math.sqrt(5));
@@ -177,6 +180,35 @@ function knot(n, rnd) {
   return out;
 }
 
+/* An exploded website: a browser window split into four layers in depth.
+   Each rect is [x, y, width, height, filled]. world.js draws the same rects as crisp lines. */
+export const SCREEN_LAYERS = [
+  { z: -1.35, rects: [[-3, -1.95, 6, 3.9, 0], [-3, 1.5, 6, 0.45, 0], [-2.8, 1.64, 0.16, 0.16, 1], [-2.52, 1.64, 0.16, 0.16, 1], [-2.24, 1.64, 0.16, 0.16, 1]] },
+  { z: -0.45, rects: [[-2.7, 0.92, 0.8, 0.26, 1], [0.55, 0.96, 0.42, 0.16, 0], [1.12, 0.96, 0.42, 0.16, 0], [1.69, 0.96, 0.42, 0.16, 0], [2.26, 0.96, 0.42, 0.16, 1], [0.45, -0.95, 2.25, 1.6, 0]] },
+  { z: 0.45, rects: [[-2.7, 0.3, 2.7, 0.34, 1], [-2.7, -0.16, 2.05, 0.34, 1], [-2.7, -0.5, 2.5, 0.09, 1], [-2.7, -0.68, 1.9, 0.09, 1], [-2.7, -1.2, 1.0, 0.36, 1], [-1.55, -1.2, 1.0, 0.36, 0]] },
+  { z: 1.35, rects: [[-2.7, -1.82, 1.7, 0.4, 0], [-0.85, -1.82, 1.7, 0.4, 0], [1.0, -1.82, 1.7, 0.4, 0], [0.75, -0.65, 0.9, 0.9, 1], [1.85, -0.2, 0.6, 0.6, 0]] },
+];
+function screens(n, rnd) {
+  const out = new Float32Array(n * 3), list = [];
+  let total = 0;
+  SCREEN_LAYERS.forEach((layer) => layer.rects.forEach(([x, y, w, h, fill]) => {
+    const weight = 2 * (w + h) + (fill ? w * h * 9 : 0) + 0.35;
+    list.push({ x, y, w, h, fill, z: layer.z, weight });
+    total += weight;
+  }));
+  for (let i = 0; i < n; i++) {
+    let pick = rnd() * total, r = list[0];
+    for (const item of list) { pick -= item.weight; if (pick <= 0) { r = item; break; } }
+    const o = i * 3;
+    let u = rnd(), v = rnd();
+    if (!(r.fill && rnd() < 0.55)) {                       // on the outline
+      if (rnd() < r.w / (r.w + r.h)) v = rnd() < 0.5 ? 0 : 1; else u = rnd() < 0.5 ? 0 : 1;
+    }
+    out[o] = r.x + u * r.w + gauss(rnd) * 0.012; out[o + 1] = r.y + v * r.h + gauss(rnd) * 0.012; out[o + 2] = r.z + gauss(rnd) * 0.02;
+  }
+  return out;
+}
+
 /* Plain sphere and loose cloud, handy for new sections */
 function sphere(n) {
   const out = new Float32Array(n * 3);
@@ -196,7 +228,8 @@ export const SHAPES = {
   torus:   { build: torus,   tilt: 1.0,  roll: 0.3,   spin: 0.14 },
   globe:   { build: globe,   tilt: 0.3,  roll: -0.2,  spin: 0.09, extra: 'arcs' },
   helix:   { build: helix,   tilt: 0.1,  roll: 0.42,  spin: 0.22 },
-  bars:    { build: bars,    tilt: 0.36, roll: 0.0,   spin: 0.07 },
+  bars:    { build: bars,    tilt: 0.36, roll: 0.0,   spin: 0.07, extra: 'floor' },
+  screens: { build: screens, tilt: 0.16, roll: -0.04, spin: 0.0, yaw: -0.75, sweep: 1.25, explode: true, extra: 'wire' },
   wave:    { build: wave,    tilt: 0.62, roll: 0.0,   spin: 0.04 },
   knot:    { build: knot,    tilt: 0.2,  roll: 0.0,   spin: 0.14 },
   sphere:  { build: sphere,  tilt: 0.2,  roll: 0.0,   spin: 0.10 },

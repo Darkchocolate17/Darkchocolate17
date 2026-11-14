@@ -21,21 +21,28 @@ Then open http://localhost:8000. Any static host works as is: GitHub Pages, Netl
 | Intro | Liquid orb inside a particle shell | Split-word headline, parallax copy, magnetic buttons |
 | Industries | (transition) | Marquee that speeds up and reverses with scroll direction |
 | Why | Spiral galaxy | Pinned section, words light up as you scroll |
-| What's inside | Modular lattice cube | Tall section, the row nearest mid-screen comes into focus |
-| Templates | Ribbed torus | Pinned horizontal scroll with tilt cards |
+| What's inside | A website exploded into four layers | Tall section: the layers spread apart and turn as you scroll, and the row nearest mid-screen comes into focus |
+| Templates | Ribbed torus | Pinned horizontal scroll where cards swing in 3D as they pass the middle |
 | Support | Dotted globe with travelling arcs | Count-up stats |
-| Process | Double helix | Sticky cards that stack and settle back |
-| Handover | Growth bar chart | Count-up stats, tilt checklist card |
-| Pricing + FAQ | Rolling wave | Tilt plan cards, accordions |
+| Process | Double helix | Sticky cards that stack like tabs and tip back in 3D |
+| Handover | Growth bar chart on a grid floor | Count-up stats, tilt checklist card |
+| Pricing + FAQ | Rolling wave, in motion | Plan cards swing in from the side, accordions |
 | Contact | Trefoil knot | Validated form, giant footer wordmark that slides in |
 
-Around all of it: a loader, a custom cursor, a section rail with scroll percentage, a header that hides on the way down, four colour skins, pointer parallax, and a pointer that dents the sculpture.
+Around all of it:
+
+- An opening shot where the sculpture gathers out of a wide swirl as the camera flies in.
+- Wireframe solids that drift past at different depths as the page scrolls.
+- A camera that widens its lens with scroll speed, and particles that fly out past it during each morph.
+- A pointer that dents the sculpture, and a click or tap that sends a ring through it.
+- Wheel and keyboard scrolling that glide instead of stepping.
+- A loader, a custom cursor, a section rail with scroll percentage, a header that hides on the way down, and four colour skins.
 
 ## Make it yours
 
 ### 1. Brand and contact: `js/config.js`
 
-`brand` fills every element marked `data-brand`. `contactEmail` is where the enquiry form sends. Particle count, bloom and scroll smoothing are here too.
+`brand` fills every element marked `data-brand`. `contactEmail` is where the enquiry form sends. Particle count, bloom, and scroll smoothing are here too. Set `smoothWheel: false` if you prefer plain native scrolling.
 
 ### 2. Copy and structure: `index.html`
 
@@ -59,11 +66,12 @@ Each section is plain HTML. The 3D journey is declared on the sections themselve
 | `data-side` | `left`, `right` or `center`: where the sculpture sits on wide screens. |
 | `data-zoom` | Camera distance. A larger number makes the sculpture smaller. |
 | `data-dim` | Optional, 0 to 1. Fades the sculpture behind dense content. |
+| `data-lift` | Optional. On tall, narrow screens the sculpture sits behind the copy; this moves it up (0 is centred, 0.5 is near the top). |
 | `data-label` | Name shown in the side rail. |
 
 Put the copy on the opposite side from the sculpture: `data-side="right"` with `.copy`, or `data-side="left"` with `.copy.right`.
 
-Available shapes: `core`, `galaxy`, `lattice`, `torus`, `globe`, `helix`, `bars`, `wave`, `knot`, `sphere`, `cloud`.
+Available shapes: `core`, `galaxy`, `screens`, `lattice`, `torus`, `globe`, `helix`, `bars`, `wave`, `knot`, `sphere`, `cloud`.
 
 ### 3. Colour and type: `css/style.css`
 
@@ -93,8 +101,8 @@ All of them are opt-in attributes, handled in `js/ui.js`.
 | `data-count="4200"` with `data-prefix`, `data-suffix`, `data-dec` | Counts up when revealed. |
 | `data-pin` on a `.pinned` section with a `.pin` child | Holds the child on screen while the section scrolls. Set the section's `min-height` to control how long. |
 | `data-scrub-words` | Inside a pinned section, lights the text up word by word. |
-| `data-hscroll` with `data-hscroll-track` | Pinned horizontal scroll. Height is computed from the track width. |
-| `data-stack` | Children become sticky cards that stack. |
+| `data-hscroll` with `data-hscroll-track` | Pinned horizontal scroll. Height is computed from the track width. Each child gets `--cy` and `--cz` for the 3D swing. |
+| `data-stack` | Children become sticky cards that stack. Each gets `--q` (0 to 1) for how far it is covered. |
 | `data-focus-list` | The child nearest mid-screen gets `.on`. |
 | `data-marquee="1"` | Endless marquee. The number is its base speed. |
 | `data-tilt` | 3D tilt and glare under the pointer. |
@@ -121,6 +129,8 @@ ring: { build: ring, tilt: 0.9, roll: 0.2, spin: 0.12 },
 
 Then use `data-shape="ring"` on a section.
 
+Optional settings on a shape: `yaw` holds a fixed facing instead of free spin, `sweep` turns it by that many radians while a tall section scrolls, `explode: true` spreads it in depth over the same scroll, and `extra` names scenery in `js/world.js` that fades in with it (`orb`, `arcs`, `wire`, `floor`).
+
 ## Files
 
 ```
@@ -136,8 +146,8 @@ vendor/           Three.js r170 (MIT)
 
 ## Behaviour worth knowing
 
-- **Native scrolling.** The page scrolls natively, so anchors, keyboard, touch and screen readers work normally. Only the effects follow a smoothed copy of the scroll position.
-- **Performance.** The scene lowers its pixel ratio and then turns bloom off if the device cannot hold about 35 fps. Phones get fewer particles.
-- **Reduced motion.** With `prefers-reduced-motion`, reveals, parallax, the cursor and idle motion are off. The sculpture still follows the scrollbar.
+- **Scrolling.** The page uses the browser's own scroll position, so touch, scrollbars, anchors and screen readers work normally. On desktop, wheel and keyboard input glide toward their target. Pinned and horizontal sections track the real scroll position exactly; only the 3D scene follows a smoothed copy.
+- **Performance.** Shaders compile behind the loader. The scene lowers its pixel ratio and then turns bloom off if the device cannot hold about 42 fps. Phones get fewer particles. Panels use no backdrop blur.
+- **Reduced motion.** With `prefers-reduced-motion`, the intro, glide, reveals, parallax, 3D card motion, the cursor and idle motion are off. The sculpture still follows the scrollbar.
 - **No WebGL or no JavaScript.** The page stays fully readable on a gradient backdrop.
 - **The form** opens the visitor's mail app. For a real backend, replace `submitForm()` in `js/ui.js` with a `fetch()` to your endpoint.

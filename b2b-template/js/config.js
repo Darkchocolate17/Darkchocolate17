@@ -14,8 +14,12 @@ export const config = {
   skins: ['ion', 'ember', 'circuit', 'paper'],
   defaultSkin: 'ion',
 
-  /* How quickly the 3D scene catches up with the scrollbar (higher = snappier) */
-  smoothing: 7,
+  /* Wheel and keyboard scrolling glide instead of stepping (desktop only). Set false for plain native scrolling. */
+  smoothWheel: true,
+  wheelEase: 7.5,      // how quickly the page reaches the wheel target (higher = snappier)
+
+  /* How quickly the 3D scene catches up with the page (higher = snappier) */
+  smoothing: 9,
 
   particles: {
     desktop: 30000,     // particle count on wide screens
@@ -26,5 +30,5 @@ export const config = {
   bloom: { strength: 0.55, radius: 0.75, threshold: 0.2 },
 
   /* Cap on device pixel ratio. The scene drops this by itself on slow GPUs. */
-  maxPixelRatio: 1.75,
+  maxPixelRatio: 1.5,
 };

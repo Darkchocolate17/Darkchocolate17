@@ -19,7 +19,7 @@ const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 /* Smoothed scroll position: the DOM scrolls natively, effects follow scroll.y */
 export const scroll = { y: window.scrollY, raw: window.scrollY, v: 0, vh: window.innerHeight, vw: window.innerWidth, max: 1 };
-export const pointer = { x: 0, y: 0, active: false };
+export const pointer = { x: 0, y: 0, active: false, clicks: 0, clickX: 0, clickY: 0 };
 
 /* ---- scene track: one entry per [data-shape] element, in page order ---- */
 export const items = $$('[data-shape]').map((el) => ({
@@ -28,6 +28,7 @@ export const items = $$('[data-shape]').map((el) => ({
   side: { left: -1, right: 1 }[el.dataset.side] ?? 0,
   zoom: parseFloat(el.dataset.zoom) || 10,
   dim: parseFloat(el.dataset.dim) || 1,
+  lift: parseFloat(el.dataset.lift) || 0.16,      // portrait screens: how far up the sculpture sits
   label: el.dataset.label || el.id || el.dataset.shape,
   hs: 0, he: 0,
 }));
@@ -51,7 +52,7 @@ function sampleTrack(y) {
   state.active = state.f < 0.5 ? state.i : state.i + 1;
 }
 
-export function initUI({ onSkin } = {}) {
+export function initUI({ onSkin, onReady } = {}) {
   root.classList.toggle('has-cursor', finePointer && !reduced);
 
   /* ---- brand + contact details from config ---- */
@@ -134,6 +135,7 @@ export function initUI({ onSkin } = {}) {
   /* ---- pinned horizontal scroll ---- */
   const hscrolls = $$('[data-hscroll]').map((el) => ({
     el, track: $('[data-hscroll-track]', el), bar: $('[data-hscroll-bar]', el), travel: 0, top: 0, height: 0,
+    cards: [...$('[data-hscroll-track]', el).children], centers: [],
   }));
 
   /* ---- sticky stacking cards ---- */
@@ -158,12 +160,14 @@ export function initUI({ onSkin } = {}) {
   const footer = { top: 0, height: 0 };
 
   /* ---- measuring ---- */
+  let marqueeWidth = -1;
   const box = (el) => { const r = el.getBoundingClientRect(); return { top: r.top + window.scrollY, height: r.height }; };
   function measure() {
     scroll.vh = window.innerHeight;
     scroll.vw = root.clientWidth;
     hscrolls.forEach((h) => {
       h.travel = Math.max(0, h.track.scrollWidth - scroll.vw);
+      h.centers = h.cards.map((c) => c.offsetLeft + c.offsetWidth / 2);
       h.el.style.height = `calc(var(--vh) + ${h.travel}px)`;
     });
     scroll.max = Math.max(1, root.scrollHeight - scroll.vh);
@@ -183,14 +187,49 @@ export function initUI({ onSkin } = {}) {
       }
       Object.assign(footer, box(footerWord));
     }
-    marquees.forEach(fillMarquee);
+    if (scroll.vw !== marqueeWidth) { marqueeWidth = scroll.vw; marquees.forEach(fillMarquee); }
   }
 
   /* ---- chrome: rail, nav, header, progress ---- */
   const railDots = $('#rail-dots'), railNow = $('#rail-now'), railTotal = $('#rail-total'), railPct = $('#rail-pct');
   const bar = $('#progress-bar'), header = $('#header');
   const pad = (n, len = 2) => String(n).padStart(len, '0');
-  const jump = (top) => window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+  /* ---- glide: wheel, keyboard and in-page links all ease toward one target ---- */
+  const smoothWheel = finePointer && !reduced && config.smoothWheel !== false;
+  const glide = { pos: window.scrollY, target: window.scrollY, active: false, sent: window.scrollY };
+  const glideTo = (top) => {
+    if (!glide.active) glide.pos = window.scrollY;
+    glide.target = clamp(top, 0, scroll.max);
+    glide.active = true;
+  };
+  const jump = (top) => (smoothWheel ? glideTo(top) : window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' }));
+  if (smoothWheel) {
+    const scrollsInside = (el, dy) => {                 // let dropdowns, textareas and other inner scrollers work normally
+      for (; el && el !== document.body && el !== root; el = el.parentElement) {
+        if (el.scrollHeight <= el.clientHeight + 1) continue;
+        const o = getComputedStyle(el).overflowY;
+        if ((o === 'auto' || o === 'scroll') && (dy < 0 ? el.scrollTop > 0 : el.scrollTop + el.clientHeight < el.scrollHeight - 1)) return true;
+      }
+      return false;
+    };
+    window.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || scrollsInside(e.target, e.deltaY)) return;
+      e.preventDefault();
+      const unit = e.deltaMode === 1 ? 36 : e.deltaMode === 2 ? scroll.vh : 1;
+      glideTo((glide.active ? glide.target : window.scrollY) + e.deltaY * unit);
+    }, { passive: false });
+    window.addEventListener('keydown', (e) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const el = e.target instanceof Element ? e.target : null;
+      if (el?.closest('input, textarea, select, [contenteditable]')) return;
+      if (e.key === ' ' && el?.closest('button, summary, a')) return;
+      const page = scroll.vh * 0.88, from = glide.active ? glide.target : window.scrollY;
+      const to = { ArrowDown: from + 110, ArrowUp: from - 110, PageDown: from + page, PageUp: from - page, ' ': from + (e.shiftKey ? -page : page), Home: 0, End: scroll.max }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      glideTo(to);
+    });
+  }
   const dots = items.map((it) => {
     const b = document.createElement('button');
     b.type = 'button';
@@ -269,6 +308,17 @@ export function initUI({ onSkin } = {}) {
     cursor?.classList.remove('off');
   }, { passive: true });
   document.addEventListener('pointerleave', () => { pointer.active = false; cursor?.classList.add('off'); });
+  window.addEventListener('touchmove', (e) => {       // a finger gives a gentler camera sway, without the dent
+    const t = e.touches[0];
+    if (!t) return;
+    pointer.x = ((t.clientX / scroll.vw) * 2 - 1) * 0.6;
+    pointer.y = -((t.clientY / scroll.vh) * 2 - 1) * 0.6;
+  }, { passive: true });
+  window.addEventListener('pointerdown', (e) => {     // a click sends a ring through the sculpture
+    pointer.clickX = (e.clientX / scroll.vw) * 2 - 1;
+    pointer.clickY = -((e.clientY / scroll.vh) * 2 - 1);
+    pointer.clicks++;
+  }, { passive: true });
   if (finePointer && !reduced) {
     const hot = 'a, button, summary, input, select, textarea, [data-tilt]';
     document.addEventListener('pointerover', (e) => cursor?.classList.toggle('grow', !!e.target.closest?.(hot)));
@@ -331,29 +381,46 @@ export function initUI({ onSkin } = {}) {
       if (num) num.textContent = Math.round(v * 100);
       if (t < 1) { requestAnimationFrame(tick); return; }
       root.classList.remove('loading');
+      onReady?.();
       setTimeout(startReveals, 150);
     };
     requestAnimationFrame(tick);
   }
 
   /* ---- per-frame update ---- */
-  let lastRaw = scroll.raw, headerHidden = false;
+  let lastRaw = scroll.raw, headerHidden = false, headerScrolled = false, shownPct = -1, shownBar = -1;
   function update(dt) {
+    /* 1. move the page: ease toward the glide target, unless something else scrolled it */
+    if (glide.active) {
+      if (Math.abs(window.scrollY - glide.sent) > 3) glide.active = false;        // scrollbar drag or touch took over
+      else {
+        glide.pos = lerp(glide.pos, glide.target, 1 - Math.exp(-dt * (config.wheelEase || 7.5)));
+        if (Math.abs(glide.target - glide.pos) < 0.35) { glide.pos = glide.target; glide.active = false; }
+        window.scrollTo(0, glide.pos);
+        glide.sent = window.scrollY;
+      }
+    }
+    if (!glide.active) glide.sent = window.scrollY;
+
+    /* 2. raw drives everything pinned to the DOM, the smoothed copy drives the 3D scene */
     const raw = window.scrollY;
     const prev = scroll.y;
     scroll.raw = raw;
     scroll.y = reduced ? raw : lerp(scroll.y, raw, 1 - Math.exp(-dt * config.smoothing));
     if (Math.abs(raw - scroll.y) < 0.1) scroll.y = raw;
     scroll.v = dt > 0 ? (scroll.y - prev) / dt : 0;
-    const y = scroll.y, vh = scroll.vh;
+    const y = raw, vh = scroll.vh;
 
-    sampleTrack(y);
+    sampleTrack(scroll.y);
     setActive(state.active);
 
     /* progress */
     const total = clamp(y / scroll.max);
-    if (bar) bar.style.transform = `scaleX(${total})`;
-    if (railPct) railPct.textContent = pad(Math.round(total * 100), 3);
+    scroll.progress = clamp(scroll.y / scroll.max);
+    const barValue = Math.round(total * 1000) / 1000;
+    if (bar && barValue !== shownBar) { shownBar = barValue; bar.style.transform = `scaleX(${barValue})`; }
+    const pct = Math.round(total * 100);
+    if (railPct && pct !== shownPct) { shownPct = pct; railPct.textContent = pad(pct, 3); }
 
     /* header hides on the way down, returns on the way up */
     const delta = raw - lastRaw;
@@ -362,7 +429,7 @@ export function initUI({ onSkin } = {}) {
       if (hide !== headerHidden) { headerHidden = hide; header?.classList.toggle('hide', hide); }
       lastRaw = raw;
     }
-    header?.classList.toggle('scrolled', raw > 40);
+    if (raw > 40 !== headerScrolled) { headerScrolled = raw > 40; header?.classList.toggle('scrolled', headerScrolled); }
 
     /* word scrub */
     scrubs.forEach((s) => {
@@ -379,8 +446,18 @@ export function initUI({ onSkin } = {}) {
     hscrolls.forEach((h) => {
       if (y + vh < h.top || y > h.top + h.height) return;
       const p = clamp((y - h.top) / Math.max(1, h.height - vh));
-      h.track.style.transform = `translate3d(${-p * h.travel}px,0,0)`;
+      const x = -p * h.travel;
+      h.track.style.transform = `translate3d(${x}px,0,0)`;
       if (h.bar) h.bar.style.transform = `scaleX(${p})`;
+      /* cards swing toward the viewer as they pass the middle of the screen */
+      if (!reduced) h.cards.forEach((card, k) => {
+        const d = clamp((h.centers[k] + x - scroll.vw / 2) / scroll.vw, -1, 1);
+        const q = Math.round(d * 200) / 200;
+        if (q === card._d) return;
+        card._d = q;
+        card.style.setProperty('--cy', `${q * -34}deg`);
+        card.style.setProperty('--cz', `${Math.abs(q) * -190}px`);
+      });
     });
 
     /* stacking cards settle back as the next one covers them */
@@ -393,8 +470,7 @@ export function initUI({ onSkin } = {}) {
         const q = Math.round(cover * 40) / 40;
         if (q === card._q) return;
         card._q = q;
-        card.style.scale = 1 - q * 0.06;
-        card.style.filter = q ? `brightness(${1 - q * 0.4})` : '';
+        card.style.setProperty('--q', q);
       });
     });
 

@@ -9,7 +9,7 @@ import { createWorld } from './world.js';
 const canvas = $('#stage');
 let world = null;
 
-const ui = initUI({ onSkin: () => world?.readSkin() });
+const ui = initUI({ onSkin: () => world?.readSkin(), onReady: () => world?.startIntro() });
 world = createWorld(canvas, items, config);
 if (!world) document.documentElement.classList.add('no-webgl');
 
@@ -37,7 +37,7 @@ function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.1);
   last = now;
   ui.update(dt);
-  world?.update(dt, now / 1000, state, scroll.v, pointer);
+  world?.update(dt, now / 1000, { st: state, velocity: scroll.v, progress: scroll.progress || 0, pointer });
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -46,5 +46,6 @@ requestAnimationFrame(frame);
 const fonts = document.fonts?.ready ?? Promise.resolve();
 Promise.race([fonts, new Promise((r) => setTimeout(r, 2500))]).then(() => {
   resize();
+  world?.warmUp();
   requestAnimationFrame(() => ui.finishLoading());
 });
