@@ -1,6 +1,7 @@
 :root {
   --bg: #04070a;
   --bg-rgb: 4, 7, 10;
+  --ink-rgb: 233, 242, 237;
   --soft: #c3d2cb;
   --on-accent: #00190d;
   --field: rgba(255, 255, 255, .04);
@@ -204,6 +205,19 @@ footer a:hover { color: var(--green); }
 .in .reveal:nth-child(5) { transition-delay: .32s; }
 .in .reveal:nth-child(6) { transition-delay: .4s; }
 
+.split .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .14em; margin-bottom: -.14em; }
+.split .w > * { display: inline-block; transform: translateY(115%); transition: transform .9s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--i) * 70ms); }
+.in .split .w > * { transform: none; }
+
+.marquee { position: relative; overflow: hidden; padding: 6vh 0; pointer-events: none; }
+.marquee span {
+  display: block; white-space: nowrap; will-change: transform;
+  font: 700 clamp(64px, 12vw, 190px)/1.05 var(--display); letter-spacing: -.03em;
+  color: transparent; -webkit-text-stroke: 1px rgba(var(--ink-rgb), .28);
+}
+.marquee span + span { color: rgba(var(--ink-rgb), .07); -webkit-text-stroke: 0; }
+.brand svg { will-change: transform; }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1180px) { .rail { display: none; } .panel.wide { width: min(520px, 100%); } }
 @media (max-width: 900px) {
@@ -230,6 +244,7 @@ footer a:hover { color: var(--green); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { transition: opacity .3s; transform: none; }
+  .split .w > * { transform: none; transition: none; }
   .loader-ring, .scroll-hint i { animation: none; }
 }
 
@@ -244,7 +259,7 @@ body.no-webgl #stage { display: none; }
   --mute: #a9c4b6;
 }
 [data-theme="daylight"] {
-  --bg: #e9ede9; --bg-rgb: 233, 237, 233; --ink: #10201a; --mute: #55695f; --soft: #33473e;
+  --bg: #e9ede9; --bg-rgb: 233, 237, 233; --ink-rgb: 16, 32, 26; --ink: #10201a; --mute: #55695f; --soft: #33473e;
   --green: #0b8f55; --cyan: #0a7fa6; --copper: #c2571a; --gold: #9a6b00; --on-accent: #ffffff;
   --glass: rgba(255, 255, 255, .86); --line: rgba(16, 32, 26, .14); --field: rgba(16, 32, 26, .04);
   --faint: rgba(16, 32, 26, .25); --edge: rgba(120, 140, 130, .28); --shadow: rgba(40, 60, 50, .18);

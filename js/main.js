@@ -4,6 +4,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 /* ------------------------------------------------------------------ *
  *  Site settings — change these to your real details
@@ -47,6 +48,25 @@ function setChapter(c) {
   $('#rail-name').textContent = chapters[c];
   navLinks.forEach((a) => a.classList.toggle('on', navChapter[a.getAttribute('href')] === c));
 }
+
+/* Headlines rise into place word by word */
+$$('h1.reveal, h2.reveal, h3.reveal').forEach((h) => {
+  let i = 0;
+  const wrap = (node) => {
+    const w = document.createElement('span'); w.className = 'w'; w.style.setProperty('--i', i++);
+    const inner = typeof node === 'string' ? Object.assign(document.createElement('span'), { textContent: node }) : node;
+    w.appendChild(inner);
+    return w;
+  };
+  [...h.childNodes].forEach((n) => {
+    if (n.nodeType === 3) {
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach((part) => frag.appendChild(part.trim() ? wrap(part) : document.createTextNode(part)));
+      n.replaceWith(frag);
+    } else if (n.nodeName !== 'BR') { const ph = document.createComment(''); n.replaceWith(ph); ph.replaceWith(wrap(n)); }
+  });
+  h.classList.replace('reveal', 'split');
+});
 
 const io = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
@@ -213,15 +233,75 @@ function ingotGeometry(w = 2.2, h = 0.55, d = 0.95) {
   return g;
 }
 
+/* Recognisable scrap, built in code */
+function ringShape(R, r) {
+  const sh = new THREE.Shape(); sh.absarc(0, 0, R, 0, Math.PI * 2, false);
+  const hole = new THREE.Path(); hole.absarc(0, 0, r, 0, Math.PI * 2, true);
+  sh.holes.push(hole);
+  return sh;
+}
+const extrude = (shape, depth) => new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 14 }).center();
+function gearGeometry(R = 0.2, teeth = 10, depth = 0.07) {
+  const sh = new THREE.Shape(), n = teeth * 4;
+  for (let i = 0; i <= n; i++) {
+    const a = (i / n) * Math.PI * 2, rr = i % 4 < 2 ? R : R * 0.78;
+    if (i) sh.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); else sh.moveTo(rr, 0);
+  }
+  const hole = new THREE.Path(); hole.absarc(0, 0, R * 0.28, 0, Math.PI * 2, true);
+  sh.holes.push(hole);
+  return extrude(sh, depth);
+}
+function hexNutGeometry(R = 0.13, depth = 0.09) {
+  const sh = new THREE.Shape();
+  for (let i = 0; i <= 6; i++) { const a = (i / 6) * Math.PI * 2; if (i) sh.lineTo(Math.cos(a) * R, Math.sin(a) * R); else sh.moveTo(R, 0); }
+  const hole = new THREE.Path(); hole.absarc(0, 0, R * 0.5, 0, Math.PI * 2, true);
+  sh.holes.push(hole);
+  return extrude(sh, depth);
+}
+function beamGeometry(w = 0.17, h = 0.2, t = 0.028, len = 0.42) {
+  const sh = new THREE.Shape(), a = w / 2, b = h / 2;
+  [[-a, -b], [a, -b], [a, -b + t], [t / 2, -b + t], [t / 2, b - t], [a, b - t], [a, b], [-a, b], [-a, b - t], [-t / 2, b - t], [-t / 2, -b + t], [-a, -b + t]]
+    .forEach(([x, y], i) => (i ? sh.lineTo(x, y) : sh.moveTo(x, y)));
+  return extrude(sh, len);
+}
+function boltGeometry() {
+  const shaft = new THREE.CylinderGeometry(0.03, 0.03, 0.32, 10);
+  const head = new THREE.CylinderGeometry(0.065, 0.065, 0.05, 6).translate(0, 0.18, 0);
+  return mergeGeometries([shaft, head]);
+}
+function crushedCanGeometry() {
+  const g = new THREE.CylinderGeometry(0.095, 0.095, 0.27, 16, 8), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), a = Math.atan2(z, x);
+    const dent = 1 - 0.32 * Math.max(0, Math.sin(y * 26 + a * 2)) - 0.18 * Math.max(0, Math.sin(a * 3 + 1));
+    p.setXYZ(i, x * dent, y * 0.8 + Math.sin(a * 2) * 0.012, z * dent * 0.62);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+class Helix extends THREE.Curve {
+  constructor(rad, h, turns) { super(); this.rad = rad; this.h = h; this.turns = turns; }
+  getPoint(u, out = new THREE.Vector3()) { const a = u * this.turns * Math.PI * 2; return out.set(Math.cos(a) * this.rad, (u - 0.5) * this.h, Math.sin(a) * this.rad); }
+}
+function bentSheetGeometry() {
+  const g = new THREE.BoxGeometry(0.38, 0.012, 0.24, 10, 1, 4), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); p.setY(i, p.getY(i) + x * x * 1.6 + Math.sin(z * 14) * 0.012); }
+  g.computeVertexNormals();
+  return g;
+}
 const scrapGeos = [
-  new THREE.BoxGeometry(0.34, 0.05, 0.2),              // sheet offcut
-  new THREE.TetrahedronGeometry(0.17),                  // shard
-  new THREE.TorusGeometry(0.11, 0.04, 8, 16),           // washer
-  new THREE.CylinderGeometry(0.035, 0.035, 0.36, 8),    // rod / bolt
-  new THREE.CylinderGeometry(0.13, 0.13, 0.07, 6),      // hex nut
+  gearGeometry(),                                        // 0 gear
+  hexNutGeometry(),                                      // 1 hex nut
+  extrude(ringShape(0.075, 0.058), 0.44),                // 2 pipe offcut
+  beamGeometry(),                                        // 3 I-beam offcut
+  boltGeometry(),                                        // 4 bolt
+  crushedCanGeometry(),                                  // 5 crushed can
+  new THREE.TubeGeometry(new Helix(0.08, 0.3, 6), 90, 0.012, 6), // 6 spring
+  bentSheetGeometry(),                                   // 7 bent sheet offcut
+  extrude(ringShape(0.12, 0.05), 0.02),                  // 8 washer
 ];
-const scrapColors = Object.values(METALS).map((c) => new THREE.Color(c));
-const SCRAP_PER = 95;
+const scrapColors = [...Object.values(METALS), 0x7a3b1e, 0x5c4a3a, 0xa9b0b6].map((c) => new THREE.Color(c));
+const SCRAP_PER = 54;
 const dummy = new THREE.Object3D();
 const tmpM = new THREE.Matrix4();
 const vortexItems = (n, sMin, sMax) => Array.from({ length: n }, () => ({
@@ -231,7 +311,7 @@ const vortexItems = (n, sMin, sMax) => Array.from({ length: n }, () => ({
 }));
 // each entry: { parts: [{ mesh: InstancedMesh, local: Matrix4|null }], items }
 let scrap = scrapGeos.map((geo) => {
-  const mesh = new THREE.InstancedMesh(geo, metal(0xffffff, 0.34), SCRAP_PER);
+  const mesh = new THREE.InstancedMesh(geo, metal(0xffffff, 0.42), SCRAP_PER);
   for (let i = 0; i < SCRAP_PER; i++) mesh.setColorAt(i, scrapColors[(Math.random() * scrapColors.length) | 0]);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   mesh.frustumCulled = false;
@@ -260,9 +340,8 @@ const layerMetals = [METALS.steel, METALS.aluminium, METALS.brass, METALS.copper
 const ingots = [];
 for (let layer = 0; layer < 4; layer++) {
   const n = 4 - layer;
-  const mat = metal(layerMetals[layer], 0.22);
   for (let i = 0; i < n; i++) {
-    const m = new THREE.Mesh(ingotGeo, mat);
+    const m = new THREE.Mesh(ingotGeo, metal(layerMetals[layer], 0.22, { emissive: 0xff5a00, emissiveIntensity: 0 }));
     m.userData.home = new THREE.Vector3(0, layer * 0.57, (i - (n - 1) / 2) * 1.02);
     m.userData.spin = rand(-2, 2);
     ingotProc.add(m);
@@ -329,6 +408,11 @@ for (let i = 0; i < 12; i++) {
   c.position.set(rand(-2.9, 2.9), h / 2 + 0.01, (Math.random() > 0.5 ? 1 : -1) * rand(1.75, 1.95) * (i % 2 ? 1 : 0.42));
   compLayer.add(c);
 }
+
+compLayer.children.forEach((c) => { c.userData.delay = Math.random(); c.userData.y = c.position.y; c.userData.turn = rand(-0.6, 0.6); });
+const scan = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.02, BD), glow(GREEN, 3));
+scan.position.y = 0.075;
+pcbProc.add(scan);
 
 /* ------------------------------------------------------------------ *
  *  3 · WIRES — a cable bundle whose insulation strips back
@@ -397,6 +481,79 @@ function points(positions, opts, colors) {
   tunnel.add(points(pos, { size: 0.09, color: theme.additive ? 0x9fffe0 : theme.dust, opacity: 0.8 }));
 }
 
+/* Motion graphics that need particles: sparks, granules and one effect per process gate */
+function livePoints(n, opts, colors) {
+  const pts = points(new Float32Array(n * 3), opts, colors);
+  pts.frustumCulled = false;
+  const seeds = Array.from({ length: n }, () => [Math.random(), Math.random(), Math.random(), Math.random()]);
+  return { pts, seeds, pos: pts.geometry.attributes.position };
+}
+// sparks rising off the freshly poured ingots
+const sparks = livePoints(110, { size: 0.09, color: 0xffa040, opacity: 0 });
+metals.add(sparks.pts);
+// copper granules dropping from the stripped cable ends
+const granules = livePoints(160, { size: 0.085, color: 0xff9a52, opacity: 0 });
+wires.add(granules.pts);
+
+const gateFx = [];
+{ // 01 Collect — loose pieces spiral in towards the gate
+  const n = 40, mesh = new THREE.InstancedMesh(scrapGeos[1], metal(0xffffff, 0.4), n);
+  for (let i = 0; i < n; i++) mesh.setColorAt(i, scrapColors[i % scrapColors.length]);
+  mesh.frustumCulled = false;
+  gates[0].g.add(mesh);
+  gateFx.push((time) => {
+    for (let i = 0; i < n; i++) {
+      const u = (time * 0.12 + i / n) % 1, a = i * 2.4 + time * 0.5, rad = 4.6 - u * 2.5;
+      dummy.position.set(Math.cos(a) * rad, Math.sin(a) * rad, 1.5 - u * 3);
+      dummy.rotation.set(time + i, time * 0.7 + i, 0);
+      dummy.scale.setScalar(2.2 - u * 1.2);
+      dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  });
+}
+{ // 02 Sort — three lanes, one per metal, turning at their own speed
+  const lanes = [[2.15, METALS.copper, 0.5], [2.6, METALS.aluminium, -0.35], [3.05, METALS.brass, 0.22]].map(([rad, col, speed]) => {
+    const pos = [];
+    for (let i = 0; i < 70; i++) { const a = (i / 70) * Math.PI * 2 * 0.72; pos.push(Math.cos(a) * rad, Math.sin(a) * rad, 0); }
+    const lane = points(pos, { size: 0.16, color: col, opacity: 0.95 });
+    gates[1].g.add(lane);
+    return { lane, speed };
+  });
+  gateFx.push((time) => lanes.forEach(({ lane, speed }) => { lane.rotation.z = time * speed; }));
+}
+{ // 03 Shred — two counter-rotating toothed rollers
+  const geo = gearGeometry(0.95, 14, 0.4), mat = metal(0x6f777d, 0.35);
+  const a = new THREE.Mesh(geo, mat), b = new THREE.Mesh(geo, mat);
+  a.position.x = -2.3; b.position.x = 2.3;
+  gates[2].g.add(a, b);
+  gateFx.push((time) => { a.rotation.z = time * 1.1; b.rotation.z = -time * 1.1 + 0.22; });
+}
+{ // 04 Separate — light fraction lifts, heavy fraction drops
+  const n = 140, col = [], cu = new THREE.Color(METALS.copper), gr = new THREE.Color(0x9fb0b8);
+  for (let i = 0; i < n; i++) { const c = i % 2 ? cu : gr; col.push(c.r, c.g, c.b); }
+  const fx = livePoints(n, { size: 0.13, opacity: 0.95 }, col);
+  gates[3].g.add(fx.pts);
+  gateFx.push((time) => {
+    for (let i = 0; i < n; i++) {
+      const [s0, s1, s2] = fx.seeds[i], u = (time * (0.18 + s2 * 0.12) + s0) % 1, side = i % 4 < 2 ? -1 : 1, dir = i % 2 ? -1 : 1;
+      fx.pos.setXYZ(i, side * (1.7 + s1 * 1.3 + u * 0.5), dir * u * u * 2.8 + (s1 - 0.5) * 0.4, (s2 - 0.5) * 1.2);
+    }
+    fx.pos.needsUpdate = true;
+  });
+}
+{ // 05 Refine — fresh ingots circling the gate, still glowing
+  const ring = new THREE.Group(), mat = metal(METALS.copper, 0.25, { emissive: 0xff5a00, emissiveIntensity: 1 });
+  for (let i = 0; i < 6; i++) {
+    const m = new THREE.Mesh(ingotGeometry(0.75, 0.2, 0.34), mat), a = (i / 6) * Math.PI * 2;
+    m.position.set(Math.cos(a) * 2.45, Math.sin(a) * 2.45, 0);
+    m.rotation.z = a + Math.PI / 2;
+    ring.add(m);
+  }
+  gates[4].g.add(ring);
+  gateFx.push((time) => { ring.rotation.z = time * 0.35; mat.emissiveIntensity = 0.9 + Math.sin(time * 2.2) * 0.6; });
+}
+
 /* ------------------------------------------------------------------ *
  *  5 · IMPACT — a planet kept in orbit by closed loops
  * ------------------------------------------------------------------ */
@@ -444,8 +601,8 @@ function scatter(parts, n, sMin, sMax) {
   dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(1);
   for (const { mesh } of parts) { mesh.frustumCulled = false; scene.add(mesh); debris.push(mesh); }
 }
-[scrapGeos[0], scrapGeos[1], scrapGeos[4]].forEach((geo) => {
-  const n = 90, mesh = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color: 0x9a9a9a, metalness: 0.85, roughness: 0.6 }), n);
+[scrapGeos[0], scrapGeos[3], scrapGeos[5], scrapGeos[2]].forEach((geo) => {
+  const n = 60, mesh = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color: 0x9a9a9a, metalness: 0.85, roughness: 0.6 }), n);
   for (let i = 0; i < n; i++) mesh.setColorAt(i, scrapColors[(Math.random() * scrapColors.length) | 0]);
   scatter([{ mesh, local: null }], n, 1.2, 3.4);
 });
@@ -617,9 +774,12 @@ new ResizeObserver(measure).observe(document.body);
 resize(true);
 
 const mouse = new THREE.Vector2(), mouseS = new THREE.Vector2();
+const ray = new THREE.Raycaster(), rayO = new THREE.Vector3(), rayD = new THREE.Vector3(), tmpV = new THREE.Vector3(), ndc = new THREE.Vector2();
+let pointerSeen = false;
 const cursor = $('#cursor');
 addEventListener('pointermove', (e) => {
   mouse.set((e.clientX / innerWidth) * 2 - 1, (e.clientY / innerHeight) * 2 - 1);
+  pointerSeen = e.pointerType === 'mouse';
   cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
 });
 
@@ -628,7 +788,7 @@ addEventListener('pointermove', (e) => {
  * ------------------------------------------------------------------ */
 const N = stops.length;
 const clock = new THREE.Clock();
-const progressBar = $('#progress-bar');
+const progressBar = $('#progress-bar'), brandMark = $('.brand svg'), marquee = $$('.marquee span');
 const camPos = new THREE.Vector3(), lookPos = new THREE.Vector3();
 let t = scrollT(), intro = 0, started = false, lastT = -1, velocity = 0, slow = 0;
 
@@ -663,18 +823,32 @@ function frame() {
   /* hero */
   hero.visible = L(0) < 1.4;
   if (hero.visible) {
-    const burst = smooth(0.05, 1, L(0)), open = easeOut(intro);
+    // scrolling away pulls the scrap in and crushes it to a hot core, then flings it down the route
+    const crush = smooth(0.04, 0.5, L(0)), fling = smooth(0.55, 1.2, L(0)), open = easeOut(intro);
+    const push = pointerSeen && !reducedMotion && crush < 0.5;
+    if (push) {
+      ray.setFromCamera(ndc.set(mouseS.x, -mouseS.y), camera);
+      rayO.copy(ray.ray.origin).sub(hero.position).divideScalar(hero.scale.x);
+      rayD.copy(ray.ray.direction);
+    }
     loopRings[0].rotation.set(time * 0.31, time * 0.2, 0);
     loopRings[1].rotation.set(time * -0.24 + 1, 0, time * 0.33);
     loopRings[2].rotation.set(0.6, time * 0.42, time * -0.27);
     core.rotation.set(time * 0.2, time * 0.3, 0);
-    coreGlow.scale.setScalar(1 + Math.sin(time * 2.2) * 0.12);
+    coreGlow.scale.setScalar(1 + Math.sin(time * 2.2) * 0.12 + crush * 2.2 * (1 - fling));
+    loopRings.forEach((ring) => ring.scale.setScalar(1 - crush * 0.45));
     hero.scale.setScalar(0.6 + 0.4 * open);
     for (const { parts, items } of scrap) {
       for (let i = 0; i < items.length; i++) {
-        const it = items[i], a = it.a + time * it.sp + burst * 1.5;
-        const r = it.r * (1 + (1 - open) * 2.5 + burst * 1.6);
-        dummy.position.set(Math.cos(a) * r, it.y * (1 + burst) + Math.sin(time * 0.6 + it.ph) * 0.25, Math.sin(a) * r);
+        const it = items[i], a = it.a + time * it.sp * (1 + crush * 4) + crush * 3;
+        const r = it.r * (1 + (1 - open) * 2.5) * (1 - crush * 0.8) * (1 + fling * 5);
+        dummy.position.set(Math.cos(a) * r, it.y * (1 - crush * 0.8) * (1 + fling * 4) + Math.sin(time * 0.6 + it.ph) * 0.25 * (1 - crush), Math.sin(a) * r);
+        if (push) { // pieces shy away from the cursor
+          tmpV.copy(dummy.position).sub(rayO);
+          tmpV.addScaledVector(rayD, -tmpV.dot(rayD));
+          const d = tmpV.length();
+          if (d < 1.7 && d > 1e-4) dummy.position.addScaledVector(tmpV, ((1 - d / 1.7) ** 2 * 1.3) / d);
+        }
         dummy.rotation.set(it.spin.x * time + it.ph, it.spin.y * time, it.spin.z * time);
         dummy.scale.setScalar(it.s);
         dummy.updateMatrix();
@@ -698,7 +872,22 @@ function frame() {
       m.position.set(h.x, h.y + (1 - k) * 9, h.z);
       m.rotation.set((1 - k) * m.userData.spin, (1 - k) * m.userData.spin * 0.7, 0);
       m.visible = k > 0.001;
+      // each ingot lands glowing and cools as you keep scrolling
+      const q = p * (ingots.length + 4) / 5 - i / 5;
+      m.material.emissiveIntensity = clamp(q * 2) * (1 - smooth(1, 2.6, q)) * (1 - smooth(0.1, 0.55, L(1))) * 1.3;
     });
+  }
+
+  if (metals.visible) {
+    const heat = smooth(-0.6, -0.1, L(1)) * (1 - smooth(0.1, 0.55, L(1)));
+    sparks.pts.material.opacity = heat * 0.9;
+    if (heat > 0.01) {
+      for (let i = 0; i < sparks.seeds.length; i++) {
+        const [s0, s1, s2, s3] = sparks.seeds[i], u = (time * (0.25 + s2 * 0.35) + s0) % 1, a = s1 * 6.28 + u * 2, rad = 0.6 + s3 * 1.9 + u * 0.6;
+        sparks.pos.setXYZ(i, Math.cos(a) * rad, u * 3.6 - 0.2, Math.sin(a) * rad * 0.7);
+      }
+      sparks.pos.needsUpdate = true;
+    }
   }
 
   /* pcb */
@@ -708,7 +897,13 @@ function frame() {
     pcb.rotation.set(0.12, -0.5 + L(2) * 0.9 + time * 0.05, 0);
     copperPlane.position.y = -0.09 - e * 1.1;
     traceLayer.position.y = 0.07 + e * 0.9;
-    compLayer.position.y = 0.06 + e * 2.0;
+    compLayer.position.y = 0.06 + e * 0.5;
+    for (const c of compLayer.children) { // components lift off one after another
+      const d = c.userData.delay, ei = smooth(d * 0.55, d * 0.55 + 0.45, e);
+      c.position.y = c.userData.y + ei * (0.9 + d * 1.8);
+      c.rotation.y = ei * c.userData.turn;
+    }
+    scan.position.x = Math.sin(time * 0.9) * (BW / 2 - 0.1);
     traceMat.emissiveIntensity = 0.7 + Math.sin(time * 2.4) * 0.35 + e * 0.8;
     if (real.pcb) real.pcb.root.position.y = real.pcb.y + Math.sin(time * 0.8) * 0.08;
   }
@@ -717,6 +912,15 @@ function frame() {
   wires.visible = Math.abs(L(3)) < 1.4;
   if (wires.visible) {
     const s = smooth(-0.5, 0.35, L(3));
+    granules.pts.visible = !real.wires;
+    granules.pts.material.opacity = s * 0.9;
+    if (s > 0.01 && !real.wires) {
+      for (let i = 0; i < granules.seeds.length; i++) {
+        const [s0, s1, s2, s3] = granules.seeds[i], u = (time * (0.22 + s2 * 0.25) + s0) % 1;
+        granules.pos.setXYZ(i, -8.2 + s1 * 5.2, 0.6 - u * u * 5, (s3 - 0.5) * 2.6);
+      }
+      granules.pos.needsUpdate = true;
+    }
     if (real.wires) wires.rotation.set(0.15, time * 0.2 + L(3) * 1.2, 0);
     else wires.rotation.set(time * 0.12 + L(3) * 1.2, 0.25, 0);
     if (!real.wires) for (const { jacket, delay } of cables) {
@@ -737,6 +941,7 @@ function frame() {
       gt.frame.rotation.z = time * 0.1 * (k % 2 ? -1 : 1);
       gt.g.scale.setScalar(1 + act * 0.06);
     });
+    for (const fx of gateFx) fx(time);
   }
 
   /* globe */
@@ -750,6 +955,8 @@ function frame() {
   if (Math.abs(t - lastT) > 1e-4) {
     lastT = t;
     progressBar.style.transform = `scaleX(${u})`;
+    brandMark.style.transform = `rotate(${u * 1080}deg)`;
+    marquee.forEach((row, i) => { row.style.transform = `translate3d(${(i ? -1 : 1) * ((scrollY * 0.45) % 1600) - (i ? 0 : 1600)}px,0,0)`; });
     setChapter(+keyEls[clamp(Math.round(t), 0, N - 1)].dataset.chapter);
   }
 
