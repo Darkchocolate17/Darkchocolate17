@@ -1,6 +1,7 @@
 /* ------------------------------------------------------------------ *
  *  Motion graphics and conversion helpers:
- *  - [data-rotator]   cycles headline words
+ *  - [data-rotator]   cycles headline words like a slot machine
+ *  - .eyebrow         labels decode from random characters when they appear
  *  - [data-play]      CSS loops that only run while on screen
  *  - #estimator       live project estimate with an assembling 3D stack
  *  - #dock-cta        call to action that stays in reach on phones
@@ -19,11 +20,14 @@ export function initMotion(config) {
       if (document.hidden) return;
       words[k].classList.remove('on'); words[k].classList.add('out');
       const old = words[k];
-      setTimeout(() => old.classList.remove('out'), 700);
+      setTimeout(() => old.classList.remove('out'), 900);      // after its exit it waits below, unseen
       k = (k + 1) % words.length;
       words[k].classList.add('on');
     }, 2400);
   });
+
+  /* ---- eyebrow labels decode into place ---- */
+  if (!reduced) initDecode();
 
   /* ---- loops that only play while visible ---- */
   const playIO = new IntersectionObserver((entries) => {
@@ -133,4 +137,57 @@ function initEstimator(form, overrides) {
     if (interest) interest.value = send.dataset.interest;
   });
   compute();
+}
+
+/* Eyebrow labels: each one resolves from random characters, left to right, the first time it is
+   seen. Screen readers get the real text from a visually hidden copy, so they never hear the noise. */
+function initDecode() {
+  const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/<>_+';
+  const root = document.documentElement;
+  const jobs = new Map();
+  $$('.eyebrow').forEach((el) => {
+    const parts = [];
+    [...el.childNodes].forEach((node) => {
+      if (node.nodeType !== 3 || !node.textContent.trim()) return;
+      const real = document.createElement('span'); real.className = 'sr-only'; real.textContent = node.textContent;
+      const shown = document.createElement('span'); shown.setAttribute('aria-hidden', 'true'); shown.textContent = node.textContent;
+      node.replaceWith(real, shown);
+      parts.push({ el: shown, text: real.textContent });
+    });
+    if (parts.length) jobs.set(el, parts);
+  });
+
+  const run = (parts) => {
+    const total = parts.reduce((a, p) => a + p.text.length, 0), dur = Math.min(900, 300 + total * 18);
+    const t0 = performance.now();
+    let frame = 0;
+    const step = (now) => {
+      const t = Math.min(1, (now - t0) / dur);
+      if (frame++ % 2 === 0 || t === 1) {                 // every other frame is plenty for a flicker
+        let offset = 0;
+        parts.forEach((p) => {
+          let out = '';
+          for (let i = 0; i < p.text.length; i++) {
+            const ch = p.text[i], settle = ((offset + i) / total) * 0.75 + 0.2;
+            out += t >= settle || ch === ' ' || ch === '·' ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+          }
+          p.el.textContent = out;
+          offset += p.text.length;
+        });
+      }
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      const parts = jobs.get(e.target);
+      const go = () => (root.classList.contains('loading') ? setTimeout(go, 120) : run(parts));
+      go();
+    });
+  }, { threshold: 0.6 });
+  jobs.forEach((_, el) => io.observe(el));
 }

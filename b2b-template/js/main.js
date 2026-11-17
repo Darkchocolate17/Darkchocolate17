@@ -7,6 +7,7 @@ import { initUI, items, state, scroll, pointer, $ } from './ui.js';
 import { createWorld } from './world.js';
 import { initFlows } from './flow.js';
 import { initMotion } from './motion.js';
+import { initShowcase } from './showcase.js';
 
 const canvas = $('#stage');
 let world = null;
@@ -14,14 +15,14 @@ let world = null;
 const ui = initUI({ onSkin: () => world?.readSkin(), onReady: () => world?.startIntro() });
 world = createWorld(canvas, items, config);
 if (!world) document.documentElement.classList.add('no-webgl');
-const flows = initFlows();
+const scrollers = [...initFlows(), ...initShowcase()];      // DOM pieces driven by the scroll position
 initMotion(config);
 
 /* The canvas is sized in CSS (100lvh), so mobile address-bar changes do not resize the scene */
 let stageW = 0, stageH = 0;
 function resize() {
   ui.measure();
-  flows.forEach((f) => f.measure());
+  scrollers.forEach((s) => s.measure(scroll.vh));
   const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
   if (world && (w !== stageW || h !== stageH)) { stageW = w; stageH = h; world.resize(w, h); }
 }
@@ -31,10 +32,21 @@ const queueResize = () => {
   resizeQueued = true;
   requestAnimationFrame(() => { resizeQueued = false; resize(); });
 };
-window.addEventListener('resize', queueResize);
+/* Phones: the address bar sliding in and out changes only the height a little, and the layout
+   uses stable viewport units, so skip the expensive re-measure for those resizes. */
+const coarse = matchMedia('(pointer: coarse)').matches;
+let lastW = window.innerWidth, lastH = window.innerHeight;
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight;
+  if (coarse && w === lastW && Math.abs(h - lastH) < 160) return;
+  lastW = w; lastH = h;
+  queueResize();
+});
 window.addEventListener('load', queueResize);
 document.fonts?.ready.then(queueResize);                 // web fonts change text widths when they arrive
-if ('ResizeObserver' in window) new ResizeObserver(queueResize).observe($('#main'));   // fonts, accordions, late layout
+/* fonts, accordions and late layout: wait for the size to settle, so an opening accordion does not re-measure every frame */
+let settle = 0;
+if ('ResizeObserver' in window) new ResizeObserver(() => { clearTimeout(settle); settle = setTimeout(queueResize, 140); }).observe($('#main'));
 resize();
 
 let last = performance.now();
@@ -42,7 +54,7 @@ function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.1);
   last = now;
   ui.update(dt);
-  flows.forEach((f) => f.update(scroll.raw, scroll.vh));
+  scrollers.forEach((s) => s.update(scroll.raw, scroll.vh));
   world?.update(dt, now / 1000, { st: state, velocity: scroll.v, progress: scroll.progress || 0, pointer });
   requestAnimationFrame(frame);
 }

@@ -25,7 +25,7 @@
 <!-- ============ LOADER ============ -->
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-mark">
-    <svg viewBox="0 0 32 32" width="40" height="40"><path d="M5 5h22v22H5zM5 13h22M13 13v14" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="miter"/></svg>
+    <svg viewBox="0 0 32 32" width="40" height="40"><path pathLength="1" d="M5 5h22v22H5zM5 13h22M13 13v14" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="miter"/></svg>
   </div>
   <div class="loader-bar"><i id="loader-fill"></i></div>
   <div class="loader-row"><span>Loading the scene</span><span><b id="loader-num">0</b>%</span></div>
@@ -71,7 +71,7 @@
 
   <!-- ============ 01 · HERO ============ -->
   <section class="scene hero" id="top" data-shape="core" data-side="right" data-zoom="12" data-lift="0.5" data-label="Intro">
-    <div class="wrap" data-speed="-0.16">
+    <div class="wrap" data-speed="0.14" data-fade>
       <div class="copy copy-wide">
         <p class="eyebrow reveal"><i class="pulse"></i>UI templates · Backend templates · Custom builds</p>
         <h1 aria-label="Ship your next dashboard, API or storefront, front end and back end from one team.">
@@ -93,7 +93,7 @@
       </dl>
     </div>
     <!-- motion graphics: status chips that float around the sculpture (decorative) -->
-    <div class="chips" aria-hidden="true">
+    <div class="chips" data-play aria-hidden="true">
       <span class="chip" style="--x:6%; --y:21%; --d:.2s"><i class="dot ok"></i>POST /orders <b>201 Created</b></span>
       <span class="chip" style="--x:52%; --y:33%; --d:.7s"><i class="dot"></i>Deploy <b>live in 42 s</b></span>
       <span class="chip" style="--x:2%; --y:71%; --d:1.2s"><i class="dot ok"></i>Tests <b>48 passed</b></span>
@@ -113,6 +113,123 @@
     <div class="marquee marquee-alt" data-marquee="-0.8">
       <div class="marquee-track">
         <span>Node.js</span><span>NestJS</span><span>Python</span><span>FastAPI</span><span>Django</span><span>Go</span><span>Laravel</span><span>PostgreSQL</span><span>Redis</span><span>Docker</span><span>Stripe</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SHOWCASE (pinned: a browser window flattens as it arrives, then switches template screens) ============ -->
+  <section class="scene pinned showcase" id="showcase" data-shape="sphere" data-side="center" data-zoom="13" data-dim="0.32" data-label="Inside a template" data-pin data-showcase>
+    <div class="pin">
+      <div class="wrap show-wrap">
+        <div class="show-head">
+          <p class="eyebrow">Inside a template</p>
+          <h2>Real screens and working code, ready on day one.</h2>
+        </div>
+        <div class="device-stage">
+          <div class="device" data-device aria-hidden="true">
+            <div class="device-bar">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="device-tabs"><b class="on">Dashboard</b><b>Storefront</b><b>API docs</b><i class="tab-ink"></i></span>
+              <span class="device-url">app.yourcompany.com</span>
+            </div>
+            <div class="device-screens">
+
+              <!-- screen 1: analytics dashboard -->
+              <div class="screen scr-dash on">
+                <aside class="sd-side"><span class="sd-logo"></span><i class="on"></i><i></i><i></i><i></i><i></i></aside>
+                <div class="sd-main">
+                  <div class="sd-top"><b>Overview</b><span class="sd-search">Search orders</span><span class="sd-avatar"></span></div>
+                  <div class="sd-kpis">
+                    <div><span>Revenue</span><b>$48,210</b><em class="up">+12.4%</em><svg viewBox="0 0 60 18" preserveAspectRatio="none"><path pathLength="1" d="M0 14L10 12L20 13L30 8L40 9L50 4L60 2"/></svg></div>
+                    <div><span>Orders</span><b>1,284</b><em class="up">+8.1%</em><svg viewBox="0 0 60 18" preserveAspectRatio="none"><path pathLength="1" d="M0 12L10 13L20 9L30 10L40 6L50 7L60 3"/></svg></div>
+                    <div><span>Customers</span><b>342</b><em class="up">+3.2%</em><svg viewBox="0 0 60 18" preserveAspectRatio="none"><path pathLength="1" d="M0 15L10 14L20 11L30 12L40 9L50 8L60 6"/></svg></div>
+                    <div><span>Churn</span><b>2.1%</b><em class="down">−0.4%</em><svg viewBox="0 0 60 18" preserveAspectRatio="none"><path pathLength="1" d="M0 4L10 6L20 5L30 9L40 8L50 12L60 13"/></svg></div>
+                  </div>
+                  <div class="sd-grid">
+                    <div class="sd-card sd-area">
+                      <span>Revenue, last 30 days</span>
+                      <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+                        <defs><linearGradient id="sd-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: var(--accent); stop-opacity: .42"/><stop offset="1" style="stop-color: var(--accent); stop-opacity: 0"/></linearGradient></defs>
+                        <path class="fill" d="M0 80C30 74 45 60 75 62S120 40 150 44S200 22 225 26S275 10 300 8V100H0Z"/>
+                        <path class="line" pathLength="1" d="M0 80C30 74 45 60 75 62S120 40 150 44S200 22 225 26S275 10 300 8"/>
+                      </svg>
+                      <span class="sd-tip">Nov 24 · $2,940</span>
+                    </div>
+                    <div class="sd-card sd-donut">
+                      <span>Traffic</span>
+                      <svg viewBox="0 0 42 42"><circle class="track" cx="21" cy="21" r="15.9"/><circle class="seg a" cx="21" cy="21" r="15.9" pathLength="100" style="--len: 46; --off: 0"/><circle class="seg b" cx="21" cy="21" r="15.9" pathLength="100" style="--len: 32; --off: -46"/><circle class="seg c" cx="21" cy="21" r="15.9" pathLength="100" style="--len: 22; --off: -78"/></svg>
+                      <ul><li><i class="a"></i>Direct 46%</li><li><i class="b"></i>Search 32%</li><li><i class="c"></i>Referral 22%</li></ul>
+                    </div>
+                    <div class="sd-card sd-table">
+                      <span>Latest orders</span>
+                      <div class="row"><b>#1042</b><span>Acme GmbH</span><em class="pill ok">Paid</em><strong>$1,240</strong></div>
+                      <div class="row"><b>#1041</b><span>Nordlicht AB</span><em class="pill">Pending</em><strong>$860</strong></div>
+                      <div class="row"><b>#1040</b><span>Orbit Labs</span><em class="pill ok">Paid</em><strong>$2,115</strong></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- screen 2: storefront -->
+              <div class="screen scr-shop">
+                <div class="ss-nav"><b>aisle</b><span>New in</span><span>Women</span><span>Men</span><span>Sale</span><span class="ss-cart">Cart <i class="ss-count"><u>2</u><u>3</u></i></span></div>
+                <div class="ss-hero">
+                  <div><small>Autumn collection</small><b>Layers for every season</b><span class="ss-btn">Shop the edit</span></div>
+                  <span class="ss-blob"></span><span class="ss-blob b2"></span>
+                </div>
+                <div class="ss-grid">
+                  <div class="ss-item"><span class="ss-img i1"></span><b>Wool overshirt</b><em>$128</em></div>
+                  <div class="ss-item"><span class="ss-img i2"></span><b>Merino knit</b><em>$94</em></div>
+                  <div class="ss-item add"><span class="ss-img i3"></span><b>Canvas tote</b><em>$46</em><span class="ss-added">Added to cart</span></div>
+                  <div class="ss-item"><span class="ss-img i4"></span><b>Leather boots</b><em>$210</em></div>
+                </div>
+              </div>
+
+              <!-- screen 3: API reference -->
+              <div class="screen scr-api">
+                <aside class="sa-nav">
+                  <small>Orders</small>
+                  <span><b class="get">GET</b>/orders</span>
+                  <span class="on"><b class="post">POST</b>/orders</span>
+                  <span><b class="get">GET</b>/orders/:id</span>
+                  <small>Invoices</small>
+                  <span><b class="get">GET</b>/invoices</span>
+                  <span><b class="patch">PATCH</b>/invoices/:id</span>
+                  <small>Customers</small>
+                  <span><b class="get">GET</b>/customers</span>
+                </aside>
+                <div class="sa-doc">
+                  <small>Orders</small>
+                  <b>Create an order</b>
+                  <p>Creates an order for a customer and returns it with its invoice.</p>
+                  <div class="sa-params">
+                    <div><code>customer_id</code><span>string · required</span></div>
+                    <div><code>items</code><span>array · required</span></div>
+                    <div><code>currency</code><span>string · default EUR</span></div>
+                    <div><code>notes</code><span>string</span></div>
+                  </div>
+                </div>
+                <div class="sa-code">
+                  <div class="sa-req"><b class="post">POST</b> /v1/orders <span class="sa-status">201 Created · 38 ms</span></div>
+                  <pre><span class="ln" style="--k:0">{</span><span class="ln" style="--k:1">  <i>"id"</i>: <s>"ord_1042"</s>,</span><span class="ln" style="--k:2">  <i>"status"</i>: <s>"paid"</s>,</span><span class="ln" style="--k:3">  <i>"customer"</i>: <s>"cus_318"</s>,</span><span class="ln" style="--k:4">  <i>"items"</i>: [</span><span class="ln" style="--k:5">    { <i>"sku"</i>: <s>"TOTE-01"</s>, <i>"qty"</i>: <u>2</u> },</span><span class="ln" style="--k:6">    { <i>"sku"</i>: <s>"KNIT-04"</s>, <i>"qty"</i>: <u>1</u> }</span><span class="ln" style="--k:7">  ],</span><span class="ln" style="--k:8">  <i>"total"</i>: <u>1240.00</u>,</span><span class="ln" style="--k:9">  <i>"currency"</i>: <s>"EUR"</s>,</span><span class="ln" style="--k:10">  <i>"invoice"</i>: <s>"inv_7781"</s>,</span><span class="ln" style="--k:11">  <i>"created_at"</i>: <s>"2026-11-17T09:41:00Z"</s></span><span class="ln" style="--k:12">}</span></pre>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <!-- callouts that pop in next to each screen (decorative) -->
+          <span class="callout" data-for="0" style="--x: -3%; --y: 58%" aria-hidden="true">48 components</span>
+          <span class="callout r" data-for="0" style="--x: -3%; --y: 40%" aria-hidden="true">Light and dark themes</span>
+          <span class="callout" data-for="1" style="--x: -3%; --y: 60%" aria-hidden="true">Cart and checkout flows</span>
+          <span class="callout r" data-for="1" style="--x: -3%; --y: 36%" aria-hidden="true">Nuxt · Tailwind CSS</span>
+          <span class="callout" data-for="2" style="--x: -3%; --y: 78%" aria-hidden="true">Typed API client</span>
+          <span class="callout r" data-for="2" style="--x: -3%; --y: 72%" aria-hidden="true">48 tests included</span>
+        </div>
+        <ol class="show-steps" data-show-steps>
+          <li class="on"><button type="button" data-show-go="0"><b>Pulse</b> Analytics dashboard in React</button></li>
+          <li><button type="button" data-show-go="1"><b>Aisle</b> Storefront in Nuxt</button></li>
+          <li><button type="button" data-show-go="2"><b>Ledger</b> REST API with docs in Node</button></li>
+        </ol>
       </div>
     </div>
   </section>
@@ -137,7 +254,7 @@
       <ul class="features" data-focus-list>
         <li class="feature">
           <!-- motion graphic: dashboard with growing bars and a line that draws itself -->
-          <div class="mock mock-dash" data-play aria-hidden="true">
+          <div class="mock mock-dash" data-play data-tilt aria-hidden="true">
             <div class="mock-bar"><i></i><i></i><i></i><span>app.yourcompany.com/overview</span></div>
             <div class="dash">
               <div class="dash-side"><i></i><i></i><i></i><i></i></div>
@@ -157,7 +274,7 @@
         </li>
         <li class="feature">
           <!-- motion graphic: a terminal that sets up an API -->
-          <div class="mock mock-term" data-play aria-hidden="true">
+          <div class="mock mock-term" data-play data-tilt aria-hidden="true">
             <div class="mock-bar"><i></i><i></i><i></i><span>terminal</span></div>
             <div class="term">
               <p style="--k:0"><em>$</em> git clone ledger-api &amp;&amp; npm install</p>
@@ -175,7 +292,7 @@
         </li>
         <li class="feature">
           <!-- motion graphic: sign-in that types, submits and greets -->
-          <div class="mock mock-auth" data-play aria-hidden="true">
+          <div class="mock mock-auth" data-play data-tilt aria-hidden="true">
             <div class="mock-bar"><i></i><i></i><i></i><span>app.yourcompany.com/sign-in</span></div>
             <div class="auth">
               <div class="auth-card">
@@ -194,7 +311,7 @@
         </li>
         <li class="feature">
           <!-- motion graphic: a task card travelling across a project board -->
-          <div class="mock mock-board" data-play aria-hidden="true">
+          <div class="mock mock-board" data-play data-tilt aria-hidden="true">
             <div class="mock-bar"><i></i><i></i><i></i><span>project board</span></div>
             <div class="board">
               <div class="col"><span>Design</span><i></i><i></i></div>
@@ -334,7 +451,8 @@
             <label class="pick pick-r"><input type="radio" name="mode" value="custom"><span>Custom build<small>Built to your spec</small></span></label>
           </fieldset>
         </div>
-        <aside class="card est-summary" aria-live="polite">
+        <aside class="card est-summary" aria-live="polite" data-play>
+          <span class="ring" aria-hidden="true"></span>
           <div class="stack3d" data-stack3d aria-hidden="true"><div class="plane"></div></div>
           <p class="est-label">Estimated price</p>
           <p class="est-price"><strong data-est-price>$2,670</strong><span data-est-unit>one-time</span></p>
@@ -423,7 +541,8 @@
             <ul class="checklist"><li>UI or backend template</li><li>Docs, types and tests</li><li>12 months of updates</li><li>Email support from the authors</li></ul>
             <a class="btn ghost" href="#catalogue"><span>Browse templates</span></a>
           </article>
-          <article class="card plan plan-featured reveal" data-tilt>
+          <article class="card plan plan-featured reveal" data-tilt data-play>
+            <span class="ring" aria-hidden="true"></span>
             <span class="tag">Setup · most chosen</span>
             <p class="plan-price"><strong>$1,900</strong><span>from, one-time</span></p>
             <p class="plan-for">We fit it to you and deploy it</p>
@@ -481,7 +600,7 @@
         <p class="eyebrow reveal">Start a project</p>
         <h2 data-split>Tell us what you are building.</h2>
         <p class="lede reveal">We reply within one working day with the templates we would start from and a guide price.</p>
-        <form class="form reveal" id="demo-form" novalidate>
+        <form class="form reveal" id="demo-form" novalidate data-play>
           <label for="f-name">Name<input id="f-name" name="name" autocomplete="name" required></label>
           <label for="f-email">Work email<input id="f-email" name="email" type="email" autocomplete="email" required></label>
           <label for="f-company">Company<input id="f-company" name="company" autocomplete="organization"></label>

@@ -56,9 +56,9 @@ function buildLayout(name, spec) {
   const svg = el('svg', { viewBox: `0 0 ${spec.w} ${spec.h}`, class: `flow-svg flow-${name}` });
   const defs = el('defs', {}, svg);
   const glow = el('radialGradient', { id: `flow-glow-${name}` }, defs);
-  el('stop', { offset: '0', 'stop-color': 'var(--fg)' }, glow);
-  el('stop', { offset: '.35', 'stop-color': 'var(--accent)' }, glow);
-  el('stop', { offset: '1', 'stop-color': 'var(--accent)', 'stop-opacity': '0' }, glow);
+  el('stop', { offset: '0', style: 'stop-color: var(--fg)' }, glow);
+  el('stop', { offset: '.35', style: 'stop-color: var(--accent)' }, glow);
+  el('stop', { offset: '1', style: 'stop-color: var(--accent); stop-opacity: 0' }, glow);
 
   const base = el('g', { class: 'flow-base' }, svg);
   EDGES.forEach(([a, b]) => el('path', { d: curve(spec.pos[a], spec.pos[b]) }, base));
@@ -107,6 +107,9 @@ export function initFlows() {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const box = { top: 0, height: 1 };
     let lastStep = -1, lastP = -1;
+    /* which layout shows comes from the same media query as the CSS, so nothing is measured per frame */
+    const tallMQ = matchMedia('(max-aspect-ratio: 1/1)');
+    tallMQ.addEventListener?.('change', () => { lastP = -1; layouts.forEach((l) => l.hops.forEach((h) => { h.shown = -1; })); });
 
     function measure() {
       const r = section.getBoundingClientRect();
@@ -130,7 +133,7 @@ export function initFlows() {
       const t = reduced ? 1 : travel - hop;
 
       layouts.forEach((l) => {
-        if (!l.svg.getClientRects().length) return;                       // this layout is hidden at this width
+        if ((l.name === 'tall') !== tallMQ.matches) return;               // this layout is hidden at this width
         l.hops.forEach((h, k) => {
           const shown = k < hop ? 1 : k === hop ? t : 0;
           if (Math.abs(shown - h.shown) < 0.001) return;

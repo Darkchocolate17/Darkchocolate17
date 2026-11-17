@@ -32,12 +32,13 @@ export const config = {
 
   particles: {
     desktop: 30000,     // particle count on wide screens
-    mobile: 13000,      // particle count on phones and tablets
+    mobile: 11000,      // particle count on phones and tablets
     size: 0.046,        // world-space size of one particle
   },
 
   bloom: { strength: 0.55, radius: 0.75, threshold: 0.2 },
 
   /* Cap on device pixel ratio. The scene drops this by itself on slow GPUs. */
-  maxPixelRatio: 1.5,
+  maxPixelRatio: 1.4,
+  maxPixelRatioMobile: 1.25,
 };

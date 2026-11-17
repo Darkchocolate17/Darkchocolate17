@@ -18,8 +18,9 @@ Then open http://localhost:8000. Any static host works as is: GitHub Pages, Netl
 
 | Section | 3D shape | Motion and scroll technique |
 | --- | --- | --- |
-| Intro | Liquid orb inside a particle shell | Rotating headline word, floating status chips, magnetic buttons |
-| Stack | (transition) | Two marquee rows running opposite ways, faster as you scroll |
+| Intro | Liquid orb inside a particle shell | Slot-machine headline word, floating status chips; the copy rises and fades as you leave |
+| Stack | (transition) | Two marquee rows running opposite ways, faster as you scroll and leaning with your speed |
+| Inside a template | Particle sphere | Pinned browser window that flattens as it arrives, then switches between a live dashboard, storefront and API reference |
 | Why | Spiral galaxy | Pinned section, words light up as you scroll |
 | What we make | A website exploded into layers | Each row has a live mockup: dashboard, terminal, sign-in, project board |
 | How it connects | Particle cloud | Pinned diagram: scrolling carries an order from the UI through the API, auth, payments, jobs and database |
@@ -110,8 +111,10 @@ All of them are opt-in attributes, handled in `js/ui.js`.
 | `data-marquee="1"` | Endless marquee. The number is its base speed; a negative number runs the row the other way. |
 | `data-tilt` | 3D tilt and glare under the pointer. |
 | `data-magnetic` | Element leans toward the pointer. |
-| `data-speed="-0.16"` | Parallax drift relative to scroll. |
-| `data-rotator` | Cycles its child words. Mark the visible one `class="on"`. |
+| `data-speed="0.14"` | Parallax drift relative to scroll. Add `data-fade` to also fade the block as it leaves. |
+| `data-rotator` | Cycles its child words like a slot machine. Mark the visible one `class="on"`. |
+| `data-showcase` | A pinned section with a `[data-device]` window and `.screen` children; see `js/showcase.js`. |
+| `.eyebrow` | Labels decode from random characters the first time they appear. |
 | `data-play` | Adds `.play` while the element is on screen. Put CSS loops under `.play` so they only run when visible. |
 | `data-flow` with `data-flow-steps` | Inside a pinned section, draws the system diagram from `js/flow.js` and moves a packet through it with the scroll. |
 | `data-bill="m"` / `data-bill="y"` buttons with `data-price-m` and `data-price-y` on a price | Optional monthly/annual price toggle. |
@@ -119,6 +122,10 @@ All of them are opt-in attributes, handled in `js/ui.js`.
 ## The estimator
 
 Each option in `#estimator` carries its own `data-price` and `data-days`. The delivery rules (setup fee, custom-build multiplier and minimum) are under `estimator` in `js/config.js`. **Send this estimate** copies the summary into the contact form and picks the matching "I need" option.
+
+## The showcase window
+
+Each `.screen` inside `[data-device]` is a template preview built in HTML and CSS, sized in `em` so it scales with the window like a screenshot. Add or remove screens and their tab and step buttons together. The scroll is split evenly between the screens, and each screen's animations restart when it comes into view. A module can glide the page anywhere with `window.dispatchEvent(new CustomEvent('site:goto', { detail: y }))`.
 
 ## The flow diagram
 
@@ -155,6 +162,7 @@ js/main.js        bootstrap and the animation loop
 js/ui.js          smoothed scroll, scene track, all DOM scroll effects
 js/motion.js      rotating word, on-screen loops, estimator, phone CTA bar
 js/flow.js        scroll-driven system diagram
+js/showcase.js    pinned product showcase window
 js/world.js       Three.js scene: particles, orb, arcs, dust, backdrop, bloom
 js/shapes.js      particle shape generators
 vendor/           Three.js r170 (MIT)
@@ -163,7 +171,7 @@ vendor/           Three.js r170 (MIT)
 ## Behaviour worth knowing
 
 - **Scrolling.** The page uses the browser's own scroll position, so touch, scrollbars, anchors and screen readers work normally. On desktop, wheel and keyboard input glide toward their target. Pinned and horizontal sections track the real scroll position exactly; only the 3D scene follows a smoothed copy.
-- **Performance.** Shaders compile behind the loader. The scene lowers its pixel ratio and then turns bloom off if the device cannot hold about 42 fps. Phones get fewer particles. Panels use no backdrop blur.
-- **Reduced motion.** With `prefers-reduced-motion`, the intro, glide, reveals, parallax, 3D card motion, the cursor and idle motion are off. The sculpture still follows the scrollbar.
+- **Performance.** Shaders compile behind the loader. The scene renders at up to 1.4x pixel density (1.25x on phones), keeps every particle sprite small, and lowers its pixel ratio and then turns bloom off if the device cannot hold about 48 fps. Nothing blurs the moving 3D scene behind it. Per-frame code only writes styles; layout is measured once and again on resize. On phones, the address bar sliding in and out does not shift pinned sections.
+- **Reduced motion.** With `prefers-reduced-motion`, the intro, glide, reveals, parallax, 3D card motion, the showcase tilt, decoding labels, mockup loops, the cursor and idle motion are off. The sculpture still follows the scrollbar.
 - **No WebGL or no JavaScript.** The page stays fully readable on a gradient backdrop.
 - **The form** opens the visitor's mail app. For a real backend, replace `submitForm()` in `js/ui.js` with a `fetch()` to your endpoint.

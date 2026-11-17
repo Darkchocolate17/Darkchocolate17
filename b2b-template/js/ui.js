@@ -105,7 +105,7 @@ export function initUI({ onSkin, onReady } = {}) {
       $$('[data-count]', entry.target).forEach(countUp);
       revealIO.unobserve(entry.target);
     });
-  }, { threshold: 0.2, rootMargin: '0px 0px -8% 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -2% 0px' });   // early, so fast scrolling never shows empty space
   /* stagger siblings that reveal together */
   $$('.reveal').forEach((el) => {
     const group = [...el.parentElement.children].filter((c) => c.matches('.reveal'));
@@ -156,15 +156,20 @@ export function initUI({ onSkin, onReady } = {}) {
   };
 
   /* ---- parallax + footer word ---- */
-  const drifters = $$('[data-speed]').map((el) => ({ el, speed: parseFloat(el.dataset.speed), top: 0, height: 0 }));
+  const drifters = $$('[data-speed]').map((el) => ({ el, speed: parseFloat(el.dataset.speed), fade: el.hasAttribute('data-fade'), top: 0, height: 0, shown: '' }));
   const footerWord = $('[data-footer-word]');
   const footer = { top: 0, height: 0 };
 
   /* ---- measuring ---- */
   let marqueeWidth = -1;
+  /* a probe sized like the CSS pins (100svh), so phone address bars do not shift pinned sections */
+  const vhProbe = document.createElement('div');
+  vhProbe.setAttribute('aria-hidden', 'true');
+  vhProbe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:var(--vh);visibility:hidden;pointer-events:none';
+  document.body.appendChild(vhProbe);
   const box = (el) => { const r = el.getBoundingClientRect(); return { top: r.top + window.scrollY, height: r.height }; };
   function measure() {
-    scroll.vh = window.innerHeight;
+    scroll.vh = vhProbe.offsetHeight || window.innerHeight;     // the same height the CSS pins use
     scroll.vw = root.clientWidth;
     hscrolls.forEach((h) => {
       h.travel = Math.max(0, h.track.scrollWidth - scroll.vw);
@@ -177,7 +182,17 @@ export function initUI({ onSkin, onReady } = {}) {
       it.top = b.top; it.hs = b.top + half; it.he = b.top + b.height - half;
     });
     [...scrubs.map((s) => [s, s.host]), ...hscrolls.map((h) => [h, h.el]), ...stacks.map((s) => [s, s.el])].forEach(([o, el]) => Object.assign(o, box(el)));
-    drifters.forEach((d) => { d.el.style.transform = ''; Object.assign(d, box(d.el)); });
+    /* stacking cards: cache layout positions once, so the per-frame maths never reads the DOM */
+    stacks.forEach((s) => {
+      let at = s.top + (parseFloat(getComputedStyle(s.el).paddingTop) || 0);
+      s.layout = s.cards.map((c) => {
+        const cs = getComputedStyle(c), h = c.offsetHeight;
+        const entry = { natural: at, stick: parseFloat(cs.top) || 0, height: h };
+        at += h + (parseFloat(cs.marginBottom) || 0);
+        return entry;
+      });
+    });
+    drifters.forEach((d) => { d.el.style.transform = ''; d.shown = ''; Object.assign(d, box(d.el)); });
     if (footerWord) {
       /* size the wordmark so any brand name spans the full width */
       footerWord.style.fontSize = '';
@@ -189,6 +204,7 @@ export function initUI({ onSkin, onReady } = {}) {
       Object.assign(footer, box(footerWord));
     }
     if (scroll.vw !== marqueeWidth) { marqueeWidth = scroll.vw; marquees.forEach(fillMarquee); }
+    marquees.forEach((m) => Object.assign(m, box(m.el)));
   }
 
   /* ---- chrome: rail, nav, header, progress ---- */
@@ -197,7 +213,7 @@ export function initUI({ onSkin, onReady } = {}) {
   const pad = (n, len = 2) => String(n).padStart(len, '0');
   /* ---- glide: wheel, keyboard and in-page links all ease toward one target ---- */
   const smoothWheel = finePointer && !reduced && config.smoothWheel !== false;
-  const glide = { pos: window.scrollY, target: window.scrollY, active: false, sent: window.scrollY };
+  const glide = { pos: window.scrollY, target: window.scrollY, active: false, sent: window.scrollY, rate: config.wheelEase || 7.5 };
   const glideTo = (top) => {
     if (!glide.active) glide.pos = window.scrollY;
     glide.target = clamp(top, 0, scroll.max);
@@ -216,6 +232,8 @@ export function initUI({ onSkin, onReady } = {}) {
     window.addEventListener('wheel', (e) => {
       if (e.ctrlKey || e.metaKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || scrollsInside(e.target, e.deltaY)) return;
       e.preventDefault();
+      /* trackpads send many small deltas and carry their own momentum: follow them closely */
+      glide.rate = e.deltaMode === 0 && Math.abs(e.deltaY) < 40 ? 15 : (config.wheelEase || 7.5);
       const unit = e.deltaMode === 1 ? 36 : e.deltaMode === 2 ? scroll.vh : 1;
       glideTo((glide.active ? glide.target : window.scrollY) + e.deltaY * unit);
     }, { passive: false });
@@ -228,9 +246,12 @@ export function initUI({ onSkin, onReady } = {}) {
       const to = { ArrowDown: from + 110, ArrowUp: from - 110, PageDown: from + page, PageUp: from - page, ' ': from + (e.shiftKey ? -page : page), Home: 0, End: scroll.max }[e.key];
       if (to === undefined) return;
       e.preventDefault();
+      glide.rate = config.wheelEase || 7.5;
       glideTo(to);
     });
   }
+  /* other modules (the showcase steps) ask for a glide with this event */
+  window.addEventListener('site:goto', (e) => { glide.rate = config.wheelEase || 7.5; jump(e.detail); });
   const dots = items.map((it) => {
     const b = document.createElement('button');
     b.type = 'button';
@@ -270,6 +291,7 @@ export function initUI({ onSkin, onReady } = {}) {
     if (!target) return;
     e.preventDefault();
     closeMenu();
+    glide.rate = config.wheelEase || 7.5;
     jump(target === document.body ? 0 : box(target).top);
     target.setAttribute('tabindex', '-1');
     target.focus({ preventScroll: true });
@@ -390,14 +412,15 @@ export function initUI({ onSkin, onReady } = {}) {
 
   /* ---- per-frame update ---- */
   let lastRaw = scroll.raw, headerHidden = false, headerScrolled = false, shownPct = -1, shownBar = -1;
+  const dpr = window.devicePixelRatio || 1;
   function update(dt) {
     /* 1. move the page: ease toward the glide target, unless something else scrolled it */
     if (glide.active) {
       if (Math.abs(window.scrollY - glide.sent) > 3) glide.active = false;        // scrollbar drag or touch took over
       else {
-        glide.pos = lerp(glide.pos, glide.target, 1 - Math.exp(-dt * (config.wheelEase || 7.5)));
+        glide.pos = lerp(glide.pos, glide.target, 1 - Math.exp(-dt * glide.rate));
         if (Math.abs(glide.target - glide.pos) < 0.35) { glide.pos = glide.target; glide.active = false; }
-        window.scrollTo(0, glide.pos);
+        window.scrollTo(0, Math.round(glide.pos * dpr) / dpr);        // whole device pixels keep text crisp
         glide.sent = window.scrollY;
       }
     }
@@ -447,7 +470,7 @@ export function initUI({ onSkin, onReady } = {}) {
     hscrolls.forEach((h) => {
       if (y + vh < h.top || y > h.top + h.height) return;
       const p = clamp((y - h.top) / Math.max(1, h.height - vh));
-      const x = -p * h.travel;
+      const x = Math.round(-p * h.travel * dpr) / dpr;
       h.track.style.transform = `translate3d(${x}px,0,0)`;
       if (h.bar) h.bar.style.transform = `scaleX(${p})`;
       /* cards swing toward the viewer as they pass the middle of the screen */
@@ -464,10 +487,10 @@ export function initUI({ onSkin, onReady } = {}) {
     /* stacking cards settle back as the next one covers them */
     stacks.forEach((s) => {
       if (reduced || y + vh < s.top || y > s.top + s.height) return;
-      const rects = s.cards.map((c) => c.getBoundingClientRect());
+      const onScreen = (k) => Math.max(s.layout[k].stick, s.layout[k].natural - y);   // where sticky card k sits
       s.cards.forEach((card, k) => {
-        const next = rects[k + 1];
-        const cover = next ? clamp(1 - (next.top - rects[k].top) / Math.max(1, rects[k].height)) : 0;
+        const next = s.layout[k + 1];
+        const cover = next ? clamp(1 - (onScreen(k + 1) - onScreen(k)) / Math.max(1, s.layout[k].height)) : 0;
         const q = Math.round(cover * 40) / 40;
         if (q === card._q) return;
         card._q = q;
@@ -477,17 +500,22 @@ export function initUI({ onSkin, onReady } = {}) {
 
     /* marquees */
     marquees.forEach((m) => {
-      if (!m.loop) return;
+      if (!m.loop || y + vh < m.top || y > m.top + m.height) return;     // off screen: nothing to move
       if (Math.abs(scroll.v) > 30) m.dir = scroll.v > 0 ? -1 : 1;
       m.x += m.dir * m.rev * dt * (reduced ? 0 : 46 * m.speed + Math.abs(scroll.v) * 0.35);
       m.x = ((m.x % m.loop) + m.loop) % m.loop;
-      m.track.style.transform = `translate3d(${-m.x}px,0,0)`;
+      /* the row leans into the scroll, then straightens when it stops */
+      m.skew = lerp(m.skew || 0, reduced ? 0 : clamp(-scroll.v * 0.004, -11, 11), 1 - Math.exp(-dt * 6));
+      m.track.style.transform = `translate3d(${(-m.x).toFixed(1)}px,0,0) skewX(${m.skew.toFixed(2)}deg)`;
     });
 
     /* parallax */
     if (!reduced) drifters.forEach((d) => {
       if (y + vh < d.top - vh || y > d.top + d.height + vh) return;
-      d.el.style.transform = `translate3d(0,${(y - d.top + Math.min(d.top, vh * 0.5)) * -d.speed}px,0)`;
+      /* data-fade: the block also fades and shrinks a touch as it leaves, so it never lingers behind what follows */
+      const f = d.fade ? clamp((y - Math.max(0, d.top - vh * 0.5)) / (vh * 0.8)) : 0;
+      const css = `translate3d(0,${((y - d.top + Math.min(d.top, vh * 0.5)) * -d.speed).toFixed(1)}px,0)${f ? ` scale(${(1 - f * 0.05).toFixed(4)})` : ''}`;
+      if (css !== d.shown) { d.shown = css; d.el.style.transform = css; if (d.fade) d.el.style.opacity = (1 - f * 0.92).toFixed(3); }
     });
 
     /* footer word slides sideways as it enters */
@@ -497,10 +525,10 @@ export function initUI({ onSkin, onReady } = {}) {
     }
 
     /* cursor */
-    if (cursor && finePointer && !reduced) {
+    if (cursor && finePointer && !reduced && (Math.abs(cur.tx - cur.x) > 0.1 || Math.abs(cur.ty - cur.y) > 0.1)) {
       cur.x = lerp(cur.x, cur.tx, 1 - Math.exp(-dt * 16));
       cur.y = lerp(cur.y, cur.ty, 1 - Math.exp(-dt * 16));
-      cursor.style.transform = `translate3d(${cur.x}px,${cur.y}px,0)`;
+      cursor.style.transform = `translate3d(${cur.x.toFixed(1)}px,${cur.y.toFixed(1)}px,0)`;
     }
   }
 

@@ -55,7 +55,7 @@ export function createWorld(canvas, items, config) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const small = matchMedia('(pointer: coarse)').matches || innerWidth < 860;
   const COUNT = small ? config.particles.mobile : config.particles.desktop;
-  let dpr = Math.min(window.devicePixelRatio || 1, config.maxPixelRatio);
+  let dpr = Math.min(window.devicePixelRatio || 1, small ? (config.maxPixelRatioMobile || 1.25) : config.maxPixelRatio);
   let width = 1, height = 1, aspect = 1;
 
   const scene = new THREE.Scene();
@@ -131,11 +131,11 @@ export function createWorld(canvas, items, config) {
         p.z *= uDepth;                                               /* layered shapes spread in depth */
         p.y += sin(p.x * 0.9 + uTime * 0.9) * cos(p.z * 0.7 + uTime * 0.6) * 0.24 * uWave;
         float burst = sin(m * 3.14159265);
-        float a = burst * (aRand.y - 0.5) * 3.2, c = cos(a), s = sin(a);
+        float a = burst * (aRand.y - 0.5) * 2.4, c = cos(a), s = sin(a);
         p.xz = mat2(c, -s, s, c) * p.xz;
         vec3 drift = vec3(sin(uTime * 0.7 + aRand.w * 6.283), cos(uTime * 0.6 + aRand.z * 6.283), sin(uTime * 0.5 + aRand.x * 6.283));
-        p += drift * (0.03 + burst * (0.5 + aRand.z) * 0.9 + uChaos * 0.22 * aRand.y);
-        p *= 1.0 + burst * 0.16;
+        p += drift * (0.03 + burst * (0.5 + aRand.z) * 0.62 + uChaos * 0.18 * aRand.y);
+        p *= 1.0 + burst * 0.12;
 
         /* opening: the sculpture gathers out of a wide swirl */
         float k = 1.0 - uIntro;
@@ -153,7 +153,7 @@ export function createWorld(canvas, items, config) {
 
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         /* during a morph a few particles fly out past the camera */
-        mv.z += burst * step(0.87, r2) * (3.0 + r2 * 7.0) * uFly;
+        mv.z += burst * step(0.96, r2) * (2.0 + r2 * 4.5) * uFly;
         gl_Position = projectionMatrix * mv;
         float spark = step(0.985, aRand.z);
         gl_PointSize = clamp(uSize * (0.45 + aRand.y * 1.1) * (1.0 + spark * 1.2) * uScale / -mv.z, 1.0, uMaxPoint);
@@ -209,7 +209,7 @@ export function createWorld(canvas, items, config) {
 
   /* ---- extra: liquid orb at the heart of the "core" shape ---- */
   const orbU = { ...U, uDim: { value: 1 } };
-  const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.75, small ? 24 : 40), new THREE.ShaderMaterial({
+  const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.75, small ? 16 : 28), new THREE.ShaderMaterial({
     uniforms: orbU,
     vertexShader: /* glsl */`
       uniform float uTime; varying vec3 vN; varying vec3 vV; varying float vD;
@@ -399,22 +399,22 @@ export function createWorld(canvas, items, config) {
     composer.setSize(w, h);
     camera.aspect = aspect; camera.updateProjectionMatrix();
     U.uAspect.value = aspect;
-    U.uScale.value = (h * dpr) / (2 * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
-    pU.uMaxPoint.value = 72 * dpr;
+    U.uScale.value = (h * dpr) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));   // matches the lens in use
+    pU.uMaxPoint.value = 30 * dpr;                  // no single sprite may grow large enough to cost a frame
     const spread = clamp(aspect * 9.5, 4.5, 16);
     props.children.forEach((m) => { m.position.x = m.userData.x * spread; });
   }
 
   /* ---- adaptive quality: step down if the GPU cannot hold a steady frame rate ---- */
-  const perf = { frames: 0, time: 0, level: 0, warm: 60 };
+  const perf = { frames: 0, time: 0, level: 0, warm: 40 };
   function watchPerformance(dt) {
     if (perf.level >= 3 || dt > 0.25) return;
     if (perf.warm > 0) { perf.warm--; return; }
     perf.frames++; perf.time += dt;
-    if (perf.frames < 60) return;
+    if (perf.frames < 40) return;
     const avg = perf.time / perf.frames;
     perf.frames = 0; perf.time = 0;
-    if (avg < 1 / 42) return;
+    if (avg < 1 / 48) return;
     perf.level++; perf.warm = 30;
     if (perf.level === 1) dpr = Math.min(dpr, 1);
     else if (perf.level === 2) { bloomAllowed = false; bloom.enabled = false; }
@@ -476,7 +476,7 @@ export function createWorld(canvas, items, config) {
 
     /* framing: wide screens park the sculpture beside the copy, tall screens lift, shrink and dim it */
     const fit = clamp(0.64 / aspect, 1, 1.6);
-    const zoom = lerp(A.zoom, B.zoom, e) * fit + pulse * 1.7 + (1 - introEase) * 9;
+    const zoom = lerp(A.zoom, B.zoom, e) * fit + pulse * 1.1 + (1 - introEase) * 9;
     const halfH = Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * zoom;
     rig.position.x = lerp(A.side, B.side, e) * halfH * aspect * 0.5 * wide;
     rig.position.y = (1 - wide) * halfH * lerp(A.lift, B.lift, e);
@@ -498,11 +498,14 @@ export function createWorld(canvas, items, config) {
 
     /* camera: pointer parallax, a roll through each morph, and a wider lens at speed */
     warp = lerp(warp, reduced ? 0 : clamp(Math.abs(velocity) / 3200), ease(4, dt));
-    const fov = FOV + warp * 9 + (1 - introEase) * 14;
-    if (Math.abs(camera.fov - fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
+    const fov = FOV + warp * 6 + (1 - introEase) * 14;
+    if (Math.abs(camera.fov - fov) > 0.01) {
+      camera.fov = fov; camera.updateProjectionMatrix();
+      U.uScale.value = (height * dpr) / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2)));   // particles keep their size as the lens widens
+    }
     camera.position.set(look.x * 0.7, look.y * 0.45, zoom);
     camera.lookAt(look.x * 0.12, look.y * 0.08, 0);
-    camera.rotation.z += pulse * 0.07 * (i % 2 ? -1 : 1);
+    camera.rotation.z += pulse * 0.035 * (i % 2 ? -1 : 1);
 
     /* extras fade with the shapes that own them */
     const weight = (name) => (A === B ? +(A.meta.extra === name) : (A.meta.extra === name ? 1 - e : 0) + (B.meta.extra === name ? e : 0));
