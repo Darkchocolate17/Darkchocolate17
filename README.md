@@ -32,4 +32,4 @@ Three.js (MIT) is vendored in `vendor/`.
 
 ## B2B template
 
-`b2b-template/` is a separate, self-contained immersive 3D site for a business that sells and supports B2B website templates. It is built to be reskinned for other brands. See [b2b-template/README.md](b2b-template/README.md). When this repository is deployed to GitHub Pages it is served at `/b2b-template/`.
+`b2b-template/` is a separate, self-contained immersive 3D site for a studio that sells UI and backend templates and does custom builds. It is built to be reskinned for other brands. See [b2b-template/README.md](b2b-template/README.md). When this repository is deployed to GitHub Pages it is served at `/b2b-template/`.

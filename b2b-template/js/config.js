@@ -10,6 +10,15 @@ export const config = {
      Swap submitForm() in js/ui.js for a fetch() to your own backend. */
   contactEmail: 'hello@northframe.example',
 
+  /* Project estimator rules (prices per part live on the checkboxes in index.html) */
+  estimator: {
+    currency: '$',
+    setupFee: 1500,        // added to template prices for "Set up for you"
+    customFactor: 3,       // custom build = template prices x customFactor + customBase
+    customBase: 3000,
+    customMinimum: 6500,
+  },
+
   /* Skins are defined in css/style.css as :root[data-skin="name"] */
   skins: ['ion', 'ember', 'circuit', 'paper'],
   defaultSkin: 'ion',

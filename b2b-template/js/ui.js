@@ -144,7 +144,8 @@ export function initUI({ onSkin, onReady } = {}) {
   /* ---- marquee that speeds up and changes direction with the scroll ---- */
   const marquees = $$('[data-marquee]').map((el) => {
     const track = el.firstElementChild, originals = [...track.children];
-    return { el, track, originals, loop: 0, x: 0, dir: -1, speed: parseFloat(el.dataset.marquee) || 1 };
+    const speed = parseFloat(el.dataset.marquee) || 1;          // a negative speed runs the row the other way
+    return { el, track, originals, loop: 0, x: 0, dir: -1, rev: Math.sign(speed), speed: Math.abs(speed) };
   });
   const fillMarquee = (m) => {
     [...m.track.children].slice(m.originals.length).forEach((c) => c.remove());
@@ -478,7 +479,7 @@ export function initUI({ onSkin, onReady } = {}) {
     marquees.forEach((m) => {
       if (!m.loop) return;
       if (Math.abs(scroll.v) > 30) m.dir = scroll.v > 0 ? -1 : 1;
-      m.x += m.dir * dt * (reduced ? 0 : 46 * m.speed + Math.abs(scroll.v) * 0.35);
+      m.x += m.dir * m.rev * dt * (reduced ? 0 : 46 * m.speed + Math.abs(scroll.v) * 0.35);
       m.x = ((m.x % m.loop) + m.loop) % m.loop;
       m.track.style.transform = `translate3d(${-m.x}px,0,0)`;
     });

@@ -1,8 +1,8 @@
-# Immersive 3D B2B template
+# Immersive 3D template studio site
 
-A scroll-driven 3D website for a B2B company, built to be reskinned. One WebGL scene sits behind the whole page. As the visitor scrolls, 30,000 particles morph from one sculpture into the next while the copy moves through pinned, horizontal and stacking sections.
+A scroll-driven 3D website with motion graphics, built to be reskinned. One WebGL scene sits behind the whole page. As the visitor scrolls, 30,000 particles morph from one sculpture into the next, while live mockups, a request-flow diagram and a project estimator animate in the foreground.
 
-The sample content is for a business that sells B2B website templates and supports them. The brand name **Northframe**, the prices, the timings and the plan details are placeholders to replace with your own.
+The sample content is for a studio that sells UI templates, backend templates and full-stack starters, and does custom builds. The brand name **Northframe**, the template names, prices, timings and commitments are placeholders to replace with your own.
 
 ## Run it
 
@@ -16,18 +16,21 @@ Then open http://localhost:8000. Any static host works as is: GitHub Pages, Netl
 
 ## What is in the page
 
-| Section | 3D shape | Scroll technique |
+| Section | 3D shape | Motion and scroll technique |
 | --- | --- | --- |
-| Intro | Liquid orb inside a particle shell | Split-word headline, parallax copy, magnetic buttons |
-| Industries | (transition) | Marquee that speeds up and reverses with scroll direction |
+| Intro | Liquid orb inside a particle shell | Rotating headline word, floating status chips, magnetic buttons |
+| Stack | (transition) | Two marquee rows running opposite ways, faster as you scroll |
 | Why | Spiral galaxy | Pinned section, words light up as you scroll |
-| What's inside | A website exploded into four layers | Tall section: the layers spread apart and turn as you scroll, and the row nearest mid-screen comes into focus |
-| Templates | Ribbed torus | Pinned horizontal scroll where cards swing in 3D as they pass the middle |
-| Support | Dotted globe with travelling arcs | Count-up stats |
-| Process | Double helix | Sticky cards that stack like tabs and tip back in 3D |
-| Handover | Growth bar chart on a grid floor | Count-up stats, tilt checklist card |
-| Pricing + FAQ | Rolling wave, in motion | Plan cards swing in from the side, accordions |
-| Contact | Trefoil knot | Validated form, giant footer wordmark that slides in |
+| What we make | A website exploded into layers | Each row has a live mockup: dashboard, terminal, sign-in, project board |
+| How it connects | Particle cloud | Pinned diagram: scrolling carries an order from the UI through the API, auth, payments, jobs and database |
+| Templates | Ribbed torus | Pinned horizontal scroll, cards swing in 3D, animated thumbnails |
+| Estimate | Bar chart | Pick parts and delivery; the price counts to the new figure and a 3D stack assembles |
+| Promise | Dotted globe with arcs | Count-up stats, tilt checklist card |
+| Process | Double helix | Sticky cards that stack like tabs and tip back |
+| Pricing + FAQ | Rolling wave | Plan cards swing in, accordions |
+| Contact | Trefoil knot | Validated form, prefilled by the estimator |
+
+On phones a call-to-action bar stays in reach between the hero, the estimator and the form.
 
 Around all of it:
 
@@ -104,11 +107,22 @@ All of them are opt-in attributes, handled in `js/ui.js`.
 | `data-hscroll` with `data-hscroll-track` | Pinned horizontal scroll. Height is computed from the track width. Each child gets `--cy` and `--cz` for the 3D swing. |
 | `data-stack` | Children become sticky cards that stack. Each gets `--q` (0 to 1) for how far it is covered. |
 | `data-focus-list` | The child nearest mid-screen gets `.on`. |
-| `data-marquee="1"` | Endless marquee. The number is its base speed. |
+| `data-marquee="1"` | Endless marquee. The number is its base speed; a negative number runs the row the other way. |
 | `data-tilt` | 3D tilt and glare under the pointer. |
 | `data-magnetic` | Element leans toward the pointer. |
 | `data-speed="-0.16"` | Parallax drift relative to scroll. |
+| `data-rotator` | Cycles its child words. Mark the visible one `class="on"`. |
+| `data-play` | Adds `.play` while the element is on screen. Put CSS loops under `.play` so they only run when visible. |
+| `data-flow` with `data-flow-steps` | Inside a pinned section, draws the system diagram from `js/flow.js` and moves a packet through it with the scroll. |
 | `data-bill="m"` / `data-bill="y"` buttons with `data-price-m` and `data-price-y` on a price | Optional monthly/annual price toggle. |
+
+## The estimator
+
+Each option in `#estimator` carries its own `data-price` and `data-days`. The delivery rules (setup fee, custom-build multiplier and minimum) are under `estimator` in `js/config.js`. **Send this estimate** copies the summary into the contact form and picks the matching "I need" option.
+
+## The flow diagram
+
+The boxes, connections and the route the order takes are plain data at the top of `js/flow.js` (`NODES`, `EDGES`, `ROUTE`), with one layout for wide screens and one for phones. Edit the labels to describe your own stack; the captions are the `<li>` items in `data-flow-steps`.
 
 ## Add a 3D shape
 
@@ -139,6 +153,8 @@ css/style.css     tokens, skins, components, sections
 js/config.js      brand, email, particle and bloom settings
 js/main.js        bootstrap and the animation loop
 js/ui.js          smoothed scroll, scene track, all DOM scroll effects
+js/motion.js      rotating word, on-screen loops, estimator, phone CTA bar
+js/flow.js        scroll-driven system diagram
 js/world.js       Three.js scene: particles, orb, arcs, dust, backdrop, bloom
 js/shapes.js      particle shape generators
 vendor/           Three.js r170 (MIT)

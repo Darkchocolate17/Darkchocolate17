@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Northframe B2B Templates</title>
-<meta name="description" content="Ready-to-launch website templates for B2B companies, with a support team that sets them up, customises them and keeps them running.">
+<title>Northframe Templates and Builds</title>
+<meta name="description" content="UI templates, backend templates and full-stack starters, plus custom builds by the team that wrote them.">
 <meta name="theme-color" content="#070a12">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 5h22v22H5zM5 13h22M13 13v14' fill='none' stroke='%235cc8ff' stroke-width='4' stroke-linejoin='miter'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,9 +42,9 @@
     <span data-brand>Northframe</span>
   </a>
   <nav class="nav" id="nav" aria-label="Primary">
-    <a href="#inside">What's inside</a>
-    <a href="#templates">Templates</a>
-    <a href="#support">Support</a>
+    <a href="#make">What we make</a>
+    <a href="#catalogue">Templates</a>
+    <a href="#builder">Estimate</a>
     <a href="#process">Process</a>
     <a href="#pricing">Pricing</a>
   </nav>
@@ -55,7 +55,7 @@
       <button type="button" role="radio" data-skin-btn="circuit" aria-label="Circuit theme" aria-checked="false"></button>
       <button type="button" role="radio" data-skin-btn="paper" aria-label="Paper theme (light)" aria-checked="false"></button>
     </div>
-    <a class="btn btn-sm" href="#contact" data-magnetic><span>Talk to us</span></a>
+    <a class="btn btn-sm" href="#contact" data-magnetic><span>Start a project</span></a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><i></i><i></i></button>
   </div>
 </header>
@@ -73,29 +73,46 @@
   <section class="scene hero" id="top" data-shape="core" data-side="right" data-zoom="12" data-lift="0.5" data-label="Intro">
     <div class="wrap" data-speed="-0.16">
       <div class="copy copy-wide">
-        <p class="eyebrow reveal"><i class="pulse"></i>B2B website templates · sales and support</p>
-        <h1 data-split>Launch a B2B site that <span class="grad">sells for you.</span></h1>
-        <p class="lede reveal"><span data-brand>Northframe</span> makes ready-to-launch website templates for B2B companies. Our support team sets yours up, fits it to your brand and keeps it running after launch.</p>
+        <p class="eyebrow reveal"><i class="pulse"></i>UI templates · Backend templates · Custom builds</p>
+        <h1 aria-label="Ship your next dashboard, API or storefront, front end and back end from one team.">
+          <span data-split>Ship your next</span>
+          <span class="rotator" data-rotator aria-hidden="true">
+            <span class="on">dashboard.</span><span>API.</span><span>storefront.</span><span>admin panel.</span><span>SaaS product.</span>
+          </span>
+        </h1>
+        <p class="lede reveal"><span data-brand>Northframe</span> makes UI templates, backend templates and full-stack starters, and builds custom products on top of them. Start from tested code, or hand the whole build to us.</p>
         <div class="cta-row reveal">
-          <a class="btn" href="#templates" data-magnetic><span>Browse templates</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
-          <a class="btn ghost" href="#support" data-magnetic><span>See how support works</span></a>
+          <a class="btn" href="#builder" data-magnetic><span>Estimate your project</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+          <a class="btn ghost" href="#catalogue" data-magnetic><span>Browse templates</span></a>
         </div>
       </div>
       <dl class="hero-facts reveal">
-        <div><dt>From purchase to live site</dt><dd>10 working days</dd></div>
-        <div><dt>First reply from support</dt><dd>Under 4 hours</dd></div>
-        <div><dt>Template updates included</dt><dd>12 months</dd></div>
+        <div><dt>UI and backend templates</dt><dd>40+</dd></div>
+        <div><dt>First reply from our team</dt><dd>Within 1 working day</dd></div>
+        <div><dt>Code ownership</dt><dd>100% yours</dd></div>
       </dl>
+    </div>
+    <!-- motion graphics: status chips that float around the sculpture (decorative) -->
+    <div class="chips" aria-hidden="true">
+      <span class="chip" style="--x:6%; --y:21%; --d:.2s"><i class="dot ok"></i>POST /orders <b>201 Created</b></span>
+      <span class="chip" style="--x:52%; --y:33%; --d:.7s"><i class="dot"></i>Deploy <b>live in 42 s</b></span>
+      <span class="chip" style="--x:2%; --y:71%; --d:1.2s"><i class="dot ok"></i>Tests <b>48 passed</b></span>
+      <span class="chip" style="--x:46%; --y:80%; --d:1.7s"><i class="dot warm"></i>Lighthouse <b>98</b></span>
     </div>
     <div class="scroll-hint" aria-hidden="true"><i></i><span>Scroll</span></div>
   </section>
 
-  <!-- ============ INDUSTRY MARQUEE (reacts to scroll speed) ============ -->
-  <section class="marquee-band" aria-label="Industries we build for">
-    <p class="marquee-label">Templates for companies that sell to other companies</p>
+  <!-- ============ STACK MARQUEE (two rows, opposite directions, react to scroll speed) ============ -->
+  <section class="marquee-band" aria-label="Technologies we build with">
+    <p class="marquee-label">We build in the stack you already use</p>
     <div class="marquee" data-marquee="1">
       <div class="marquee-track">
-        <span>Manufacturing</span><span>SaaS &amp; software</span><span>Logistics &amp; freight</span><span>Wholesale</span><span>Industrial services</span><span>Professional services</span><span>Energy</span><span>Fintech</span><span>Construction supply</span><span>Medical supply</span>
+        <span>React</span><span>Next.js</span><span>Vue</span><span>Nuxt</span><span>Svelte</span><span>Tailwind CSS</span><span>TypeScript</span><span>Figma</span><span>React Native</span>
+      </div>
+    </div>
+    <div class="marquee marquee-alt" data-marquee="-0.8">
+      <div class="marquee-track">
+        <span>Node.js</span><span>NestJS</span><span>Python</span><span>FastAPI</span><span>Django</span><span>Go</span><span>Laravel</span><span>PostgreSQL</span><span>Redis</span><span>Docker</span><span>Stripe</span>
       </div>
     </div>
   </section>
@@ -104,205 +121,324 @@
   <section class="scene pinned manifesto" id="why" data-shape="galaxy" data-side="center" data-zoom="12" data-dim="0.5" data-label="Why" data-pin>
     <div class="pin">
       <div class="wrap">
-        <p class="eyebrow">Why start from a template</p>
-        <p class="scrub-text" data-scrub-words>A custom B2B website can take six months and still read like a brochure. We start from a template that already follows how business buyers decide. Then our team fits it to your company and stays with you after launch.</p>
+        <p class="eyebrow">Why start with us</p>
+        <p class="scrub-text" data-scrub-words>Most products are built from the same parts: sign-in, dashboards, payments, emails and an admin panel. We build those parts once, test them properly and sell them as templates. When you need more, the same team builds the rest.</p>
       </div>
     </div>
   </section>
 
-  <!-- ============ 03 · WHAT'S INSIDE (tall section, rows focus one at a time) ============ -->
-  <section class="scene platform" id="inside" data-shape="screens" data-side="right" data-zoom="11.5" data-label="Inside">
+  <!-- ============ 03 · WHAT WE MAKE (tall section, each row has a live mockup) ============ -->
+  <section class="scene platform" id="make" data-shape="screens" data-side="right" data-zoom="11.5" data-label="What we make">
     <div class="wrap">
       <div class="copy">
-        <p class="eyebrow reveal">What's inside</p>
-        <h2 data-split>Every template ships with the parts a B2B buyer looks for.</h2>
-        <p class="lede reveal">You are looking at one now. This page is built from the same files you receive.</p>
+        <p class="eyebrow reveal">What we make</p>
+        <h2 data-split>The screens, the systems behind them, and the work in between.</h2>
       </div>
       <ul class="features" data-focus-list>
         <li class="feature">
-          <span class="tag">Pages</span>
-          <h3>The whole site, already laid out.</h3>
-          <p>Home, solutions, industries, pricing, case study, about and contact. Each page is ready for your words and images.</p>
-          <span class="feature-meta">Home · Solutions · Pricing · Case study · Contact</span>
+          <!-- motion graphic: dashboard with growing bars and a line that draws itself -->
+          <div class="mock mock-dash" data-play aria-hidden="true">
+            <div class="mock-bar"><i></i><i></i><i></i><span>app.yourcompany.com/overview</span></div>
+            <div class="dash">
+              <div class="dash-side"><i></i><i></i><i></i><i></i></div>
+              <div class="dash-main">
+                <div class="dash-kpis"><div><b>$48.2k</b><span>Revenue</span></div><div><b>1,284</b><span>Orders</span></div><div><b>3.1%</b><span>Churn</span></div></div>
+                <div class="dash-chart">
+                  <div class="bars"><i style="--h:.42"></i><i style="--h:.58"></i><i style="--h:.5"></i><i style="--h:.72"></i><i style="--h:.64"></i><i style="--h:.86"></i><i style="--h:.78"></i><i style="--h:.95"></i></div>
+                  <svg viewBox="0 0 200 80" preserveAspectRatio="none"><path pathLength="1" d="M0 64 C20 60 30 48 50 50 S80 30 100 34 S140 20 160 18 S190 8 200 6"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="tag">UI templates</span>
+          <h3>Screens your customers enjoy using.</h3>
+          <p>Dashboards, marketing sites, storefronts and admin panels in React, Vue or Svelte. Responsive, accessible and ready for your brand.</p>
+          <span class="feature-meta">Figma files · components · light and dark themes</span>
         </li>
         <li class="feature">
-          <span class="tag">Sections</span>
-          <h3>Blocks you can reorder in minutes.</h3>
-          <p>Stat bands, feature rows, process steps, pricing tables, FAQs and enquiry forms. Move, copy or delete a block and the page adjusts.</p>
-          <span class="feature-meta">Pinned · Horizontal · Stacking · Accordion</span>
+          <!-- motion graphic: a terminal that sets up an API -->
+          <div class="mock mock-term" data-play aria-hidden="true">
+            <div class="mock-bar"><i></i><i></i><i></i><span>terminal</span></div>
+            <div class="term">
+              <p style="--k:0"><em>$</em> git clone ledger-api &amp;&amp; npm install</p>
+              <p style="--k:1"><b>✓</b> 14 routes ready <span>/orders /invoices /users</span></p>
+              <p style="--k:2"><b>✓</b> Auth with roles and sessions</p>
+              <p style="--k:3"><b>✓</b> Database migrated <span>12 tables</span></p>
+              <p style="--k:4"><b>✓</b> 48 tests passed</p>
+              <p style="--k:5"><i>→</i> Live at api.yourcompany.com<u></u></p>
+            </div>
+          </div>
+          <span class="tag">Backend templates</span>
+          <h3>APIs that work on day one.</h3>
+          <p>REST and GraphQL starters with sign-in, roles, payments, background jobs and a database schema, all covered by tests.</p>
+          <span class="feature-meta">Node · Python · Go · PostgreSQL</span>
         </li>
         <li class="feature">
-          <span class="tag">3D and motion</span>
-          <h3>A scene that moves with the scroll.</h3>
-          <p>The particle sculpture behind this page changes shape for each section. Pick the shape per section, or switch the scene off for a lighter site.</p>
-          <span class="feature-meta">12 shapes · 4 colour skins · works on phones</span>
+          <!-- motion graphic: sign-in that types, submits and greets -->
+          <div class="mock mock-auth" data-play aria-hidden="true">
+            <div class="mock-bar"><i></i><i></i><i></i><span>app.yourcompany.com/sign-in</span></div>
+            <div class="auth">
+              <div class="auth-card">
+                <b>Sign in</b>
+                <span class="field"><span class="type">maria@acme.com</span></span>
+                <span class="field"><span class="type dots">••••••••••</span></span>
+                <span class="auth-btn">Continue</span>
+              </div>
+              <div class="toast"><i class="dot ok"></i>Welcome back, Maria · Pro plan</div>
+            </div>
+          </div>
+          <span class="tag">Full-stack starters</span>
+          <h3>Both halves, already connected.</h3>
+          <p>A UI template wired to a backend template, with sign-in, billing and an admin panel working end to end before you write a line.</p>
+          <span class="feature-meta">Multi-tenant · subscriptions · admin panel</span>
         </li>
         <li class="feature">
-          <span class="tag">Lead capture</span>
-          <h3>Enquiries that reach your sales team.</h3>
-          <p>Forms check what visitors type and send each enquiry to your inbox. On a launch package we connect them to your CRM.</p>
-          <span class="feature-meta">Validated forms · inbox or CRM delivery</span>
+          <!-- motion graphic: a task card travelling across a project board -->
+          <div class="mock mock-board" data-play aria-hidden="true">
+            <div class="mock-bar"><i></i><i></i><i></i><span>project board</span></div>
+            <div class="board">
+              <div class="col"><span>Design</span><i></i><i></i></div>
+              <div class="col"><span>Build</span><i></i></div>
+              <div class="col"><span>Live</span><i></i><i></i></div>
+              <div class="mover">Client portal · SSO</div>
+            </div>
+          </div>
+          <span class="tag">Custom builds</span>
+          <h3>The parts no template covers.</h3>
+          <p>We extend a template or start from scratch: integrations, internal tools and client portals. Fixed quote and a preview link every week.</p>
+          <span class="feature-meta">Scoped in one call · fixed quote</span>
         </li>
       </ul>
     </div>
   </section>
 
-  <!-- ============ 04 · TEMPLATES (pinned horizontal scroll) ============ -->
-  <section class="scene pinned hscroll" id="templates" data-shape="torus" data-side="center" data-zoom="11" data-dim="0.5" data-label="Templates" data-hscroll>
+  <!-- ============ 04 · HOW IT CONNECTS (pinned, scroll drives a request through the system) ============ -->
+  <section class="scene pinned flow" id="flow" data-shape="cloud" data-side="center" data-zoom="12" data-dim="0.3" data-label="How it connects" data-pin>
+    <div class="pin">
+      <div class="wrap flow-wrap">
+        <div class="flow-head">
+          <p class="eyebrow">How the pieces connect</p>
+          <h2>Follow one order through a stack we built.</h2>
+        </div>
+        <div class="flow-stage" data-flow aria-hidden="true"></div>
+        <ol class="flow-steps" data-flow-steps>
+          <li>A buyer presses Pay on your storefront.</li>
+          <li>The API checks who they are and what they may do.</li>
+          <li>The payment goes through and the order is saved.</li>
+          <li>A background job emails the receipt.</li>
+          <li>The screen confirms the order. Every step is code you own.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · CATALOGUE (pinned horizontal scroll, animated thumbnails) ============ -->
+  <section class="scene pinned hscroll" id="catalogue" data-shape="torus" data-side="center" data-zoom="11" data-dim="0.5" data-label="Templates" data-hscroll>
     <div class="pin">
       <div class="wrap hscroll-head">
         <div>
-          <p class="eyebrow">Templates</p>
-          <h2>A template for the way your industry sells.</h2>
+          <p class="eyebrow">Template catalogue</p>
+          <h2>Start from a template that already works.</h2>
         </div>
         <div class="hscroll-meter" aria-hidden="true"><i data-hscroll-bar></i></div>
       </div>
       <div class="hscroll-track" data-hscroll-track>
-        <article class="card sol-card" data-tilt>
-          <span class="tag">Manufacturing</span>
-          <h3>Forge</h3>
-          <p>Product lines, spec sheets and a distributor finder, for buyers who compare on the detail.</p>
-          <div class="sol-stat"><strong>14 pages</strong><span>with spec-sheet and catalogue layouts</span></div>
+        <article class="card sol-card tpl" data-tilt>
+          <div class="thumb thumb-dash" data-play aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="tag">UI template</span>
+          <h3>Pulse</h3>
+          <p>Analytics dashboard with charts, tables, filters and settings screens.</p>
+          <div class="tpl-foot"><span>24 screens · React</span><strong>$290</strong></div>
         </article>
-        <article class="card sol-card" data-tilt>
-          <span class="tag">SaaS &amp; software</span>
-          <h3>Stack</h3>
-          <p>Feature tours, integration lists and a pricing table that leads to a demo request.</p>
-          <div class="sol-stat"><strong>12 pages</strong><span>with pricing and changelog layouts</span></div>
+        <article class="card sol-card tpl" data-tilt>
+          <div class="thumb thumb-site" data-play aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <span class="tag">UI template</span>
+          <h3>Harbor</h3>
+          <p>B2B marketing site with solution, pricing, case study and contact pages.</p>
+          <div class="tpl-foot"><span>14 pages · Next.js</span><strong>$290</strong></div>
         </article>
-        <article class="card sol-card" data-tilt>
-          <span class="tag">Logistics &amp; freight</span>
+        <article class="card sol-card tpl" data-tilt>
+          <div class="thumb thumb-shop" data-play aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="tag">UI template</span>
+          <h3>Aisle</h3>
+          <p>Storefront with catalogue, product, cart and checkout flows.</p>
+          <div class="tpl-foot"><span>18 screens · Nuxt</span><strong>$340</strong></div>
+        </article>
+        <article class="card sol-card tpl" data-tilt>
+          <div class="thumb thumb-code" data-play aria-hidden="true"><code><b>GET</b> /orders</code><code><b>POST</b> /orders</code><code><b>GET</b> /invoices/:id</code><code><b>PATCH</b> /users/:id</code></div>
+          <span class="tag tag-b">Backend template</span>
+          <h3>Ledger</h3>
+          <p>REST API for orders, invoices and customers, with a PostgreSQL schema and tests.</p>
+          <div class="tpl-foot"><span>Node · PostgreSQL</span><strong>$490</strong></div>
+        </article>
+        <article class="card sol-card tpl" data-tilt>
+          <div class="thumb thumb-lock" data-play aria-hidden="true"><i></i><i></i><i></i></div>
+          <span class="tag tag-b">Backend template</span>
+          <h3>Gate</h3>
+          <p>Sign-in, roles, teams and subscription billing as one service you deploy.</p>
+          <div class="tpl-foot"><span>Sessions · SSO · Stripe</span><strong>$490</strong></div>
+        </article>
+        <article class="card sol-card tpl" data-tilt>
+          <div class="thumb thumb-queue" data-play aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <span class="tag tag-b">Backend template</span>
           <h3>Relay</h3>
-          <p>Service lanes, coverage and a quote form that asks for exactly what your desk needs.</p>
-          <div class="sol-stat"><strong>11 pages</strong><span>with coverage and quote layouts</span></div>
+          <p>Background jobs and webhooks with queues, retries and email sending.</p>
+          <div class="tpl-foot"><span>Redis · workers</span><strong>$390</strong></div>
         </article>
-        <article class="card sol-card" data-tilt>
-          <span class="tag">Wholesale &amp; distribution</span>
-          <h3>Depot</h3>
-          <p>Brand and category pages with a trade-account signup for new resellers.</p>
-          <div class="sol-stat"><strong>13 pages</strong><span>with category and trade-signup layouts</span></div>
-        </article>
-        <article class="card sol-card" data-tilt>
-          <span class="tag">Professional services</span>
-          <h3>Counsel</h3>
-          <p>Practice areas, team profiles and case studies that show how you work.</p>
-          <div class="sol-stat"><strong>10 pages</strong><span>with team and case-study layouts</span></div>
+        <article class="card sol-card tpl" data-tilt>
+          <div class="thumb thumb-full" data-play aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="tag tag-f">Full-stack starter</span>
+          <h3>Keystone</h3>
+          <p>Multi-tenant SaaS starter: UI, API, sign-in, billing and admin, already connected.</p>
+          <div class="tpl-foot"><span>Next.js · NestJS</span><strong>$990</strong></div>
         </article>
         <article class="card sol-card sol-card-cta">
-          <h3>Selling something else?</h3>
-          <p>Tell us what you sell and who buys it. We will point you to the closest template or adapt one.</p>
-          <a class="btn ghost" href="#contact"><span>Ask our team</span></a>
+          <h3>Need something that is not here?</h3>
+          <p>Tell us what you are building. We will point you to the closest template or quote a custom build.</p>
+          <a class="btn ghost" href="#builder"><span>Estimate a custom build</span></a>
         </article>
       </div>
     </div>
   </section>
 
-  <!-- ============ 05 · SUPPORT ============ -->
-  <section class="scene network" id="support" data-shape="globe" data-side="left" data-zoom="12.5" data-dim="0.6" data-label="Support">
-    <div class="wrap">
-      <div class="copy right">
-        <p class="eyebrow reveal">Support</p>
-        <h2 data-split>One team for setup, changes and fixes.</h2>
-        <p class="lede reveal">You write to the people who built your template. They set it up, make the changes you ask for and fix what breaks, wherever your team works.</p>
-        <div class="stats reveal">
-          <div class="stat"><strong><span data-count="4" data-suffix=" h">4 h</span></strong><span>to a first reply on working days</span></div>
-          <div class="stat"><strong><span data-count="12" data-suffix=" mo">12 mo</span></strong><span>of template updates included</span></div>
-          <div class="stat"><strong><span data-count="3">3</span></strong><span>rounds of changes during setup</span></div>
-          <div class="stat"><strong><span data-count="5" data-suffix=" days">5 days</span></strong><span>a week the support desk is open</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 06 · PROCESS (sticky stacking cards) ============ -->
-  <section class="scene process" id="process" data-shape="helix" data-side="right" data-zoom="13" data-label="Process">
+  <!-- ============ 06 · ESTIMATOR (pick parts, watch the stack assemble) ============ -->
+  <section class="scene builder" id="builder" data-shape="bars" data-side="center" data-zoom="13" data-dim="0.28" data-label="Estimate">
     <div class="wrap">
       <div class="copy">
-        <p class="eyebrow reveal">Process</p>
-        <h2 data-split>From purchase to live site in ten working days.</h2>
-        <p class="lede reveal">This is the launch package. If you buy the template alone, you get the files and guide on day one.</p>
+        <p class="eyebrow reveal">Estimate your project</p>
+        <h2 data-split>Pick the parts. See the price before you call.</h2>
+        <p class="lede reveal">Choose what you need. The estimate updates as you go, and you can send it to us in one click.</p>
       </div>
-      <ol class="stack" data-stack>
-        <li class="card stack-card" style="--i:0">
-          <div class="stack-top"><span class="step-no">01</span><span class="tag">Day 1</span></div>
-          <h3>Choose</h3>
-          <p>Pick the template closest to your business. You receive the files, the guide and your licence straight away.</p>
-        </li>
-        <li class="card stack-card" style="--i:1">
-          <div class="stack-top"><span class="step-no">02</span><span class="tag">Days 2–3</span></div>
-          <h3>Brief</h3>
-          <p>Send us your logo, colours and existing copy. We map your content to the pages and tell you what is missing.</p>
-        </li>
-        <li class="card stack-card" style="--i:2">
-          <div class="stack-top"><span class="step-no">03</span><span class="tag">Days 4–8</span></div>
-          <h3>Build</h3>
-          <p>Our team applies your brand, places your content and connects your forms. You review a private link and ask for changes.</p>
-        </li>
-        <li class="card stack-card" style="--i:3">
-          <div class="stack-top"><span class="step-no">04</span><span class="tag">Days 9–10</span></div>
-          <h3>Launch</h3>
-          <p>We test on phones and desktops, go live on your domain and hand over the files. Support starts the same day.</p>
-        </li>
-      </ol>
+      <form class="est reveal" id="estimator" aria-label="Project estimator">
+        <div class="est-options">
+          <fieldset>
+            <legend><b>1</b> What do people see?</legend>
+            <label class="pick"><input type="checkbox" name="part" value="Dashboard" data-group="ui" data-price="390" data-days="3" checked><span>Dashboard</span></label>
+            <label class="pick"><input type="checkbox" name="part" value="Marketing site" data-group="ui" data-price="290" data-days="2"><span>Marketing site</span></label>
+            <label class="pick"><input type="checkbox" name="part" value="Storefront" data-group="ui" data-price="340" data-days="4"><span>Storefront</span></label>
+            <label class="pick"><input type="checkbox" name="part" value="Admin panel" data-group="ui" data-price="390" data-days="3"><span>Admin panel</span></label>
+            <label class="pick"><input type="checkbox" name="part" value="Mobile web app" data-group="ui" data-price="490" data-days="4"><span>Mobile web app</span></label>
+          </fieldset>
+          <fieldset>
+            <legend><b>2</b> What runs behind it?</legend>
+            <label class="pick pick-b"><input type="checkbox" name="part" value="REST API" data-group="api" data-price="490" data-days="4" checked><span>REST API</span></label>
+            <label class="pick pick-b"><input type="checkbox" name="part" value="GraphQL API" data-group="api" data-price="590" data-days="5"><span>GraphQL API</span></label>
+            <label class="pick pick-b"><input type="checkbox" name="part" value="Sign-in and roles" data-group="api" data-price="290" data-days="2" checked><span>Sign-in and roles</span></label>
+            <label class="pick pick-b"><input type="checkbox" name="part" value="Payments and billing" data-group="api" data-price="390" data-days="3"><span>Payments and billing</span></label>
+            <label class="pick pick-b"><input type="checkbox" name="part" value="Background jobs" data-group="api" data-price="290" data-days="2"><span>Background jobs</span></label>
+          </fieldset>
+          <fieldset>
+            <legend><b>3</b> How should we deliver it?</legend>
+            <label class="pick pick-r"><input type="radio" name="mode" value="template"><span>Templates only<small>You build it</small></span></label>
+            <label class="pick pick-r"><input type="radio" name="mode" value="setup" checked><span>Set up for you<small>Your brand, deployed</small></span></label>
+            <label class="pick pick-r"><input type="radio" name="mode" value="custom"><span>Custom build<small>Built to your spec</small></span></label>
+          </fieldset>
+        </div>
+        <aside class="card est-summary" aria-live="polite">
+          <div class="stack3d" data-stack3d aria-hidden="true"><div class="plane"></div></div>
+          <p class="est-label">Estimated price</p>
+          <p class="est-price"><strong data-est-price>$2,670</strong><span data-est-unit>one-time</span></p>
+          <p class="est-time" data-est-time>Live in about 10 working days</p>
+          <p class="est-parts" data-est-parts>Dashboard, REST API, Sign-in and roles</p>
+          <a class="btn full" href="#contact" data-est-send><span>Send this estimate</span></a>
+          <p class="est-note">A guide price. We confirm a fixed quote after a 30-minute call.</p>
+        </aside>
+      </form>
     </div>
   </section>
 
-  <!-- ============ 07 · HANDOVER ============ -->
-  <section class="scene results" id="handover" data-shape="bars" data-side="left" data-zoom="12.5" data-label="Handover">
+  <!-- ============ 07 · PROMISE ============ -->
+  <section class="scene network" id="promise" data-shape="globe" data-side="left" data-zoom="12.5" data-dim="0.6" data-label="Promise">
     <div class="wrap">
       <div class="copy right">
-        <p class="eyebrow reveal">Handover</p>
-        <h2 data-split>Yours to own and easy to change.</h2>
-        <div class="stats stats-big reveal">
-          <div class="stat"><strong><span data-count="0">0</span></strong><span>build tools or plugins to maintain</span></div>
-          <div class="stat"><strong><span data-count="3">3</span> files</strong><span>hold all copy, colours and settings</span></div>
-          <div class="stat"><strong><span data-count="4">4</span> skins</strong><span>included, and a new one is one CSS rule</span></div>
+        <p class="eyebrow reveal">Why teams pick us</p>
+        <h2 data-split>Built by the people who answer your email.</h2>
+        <p class="lede reveal">The engineers who wrote your template are the ones who reply when you have a question, wherever your team works.</p>
+        <div class="stats reveal">
+          <div class="stat"><strong><span data-count="1" data-suffix=" day">1 day</span></strong><span>to a first reply, on working days</span></div>
+          <div class="stat"><strong><span data-count="12" data-suffix=" mo">12 mo</span></strong><span>of updates with every template</span></div>
+          <div class="stat"><strong><span data-count="100" data-suffix="%">100%</span></strong><span>of the code is yours to change</span></div>
+          <div class="stat"><strong><span data-count="14" data-suffix=" days">14 days</span></strong><span>to ask for a refund on a template</span></div>
         </div>
         <div class="card included reveal" data-tilt>
-          <h3>What you receive</h3>
+          <h3>Every template ships with</h3>
           <ul class="checklist">
-            <li>Full source files in plain HTML, CSS and JavaScript</li>
-            <li>A written guide to every section and scroll effect</li>
-            <li>A licence for one company website</li>
-            <li>Hosting on any static host, with no lock-in</li>
+            <li>TypeScript types, tests and a CI configuration</li>
+            <li>Docs for every screen and every endpoint</li>
+            <li>A commercial licence for one product</li>
+            <li>No lock-in: deploy it wherever you like</li>
           </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 08 · PRICING + FAQ ============ -->
+  <!-- ============ 08 · PROCESS (sticky stacking cards) ============ -->
+  <section class="scene process" id="process" data-shape="helix" data-side="right" data-zoom="13" data-label="Process">
+    <div class="wrap">
+      <div class="copy">
+        <p class="eyebrow reveal">Custom builds</p>
+        <h2 data-split>From first call to launch in about six weeks.</h2>
+        <p class="lede reveal">A typical custom build on top of our templates. Smaller jobs are faster.</p>
+      </div>
+      <ol class="stack" data-stack>
+        <li class="card stack-card" style="--i:0">
+          <div class="stack-top"><span class="step-no">01</span><span class="tag">Week 1</span></div>
+          <h3>Scope</h3>
+          <p>A 30-minute call, then a written scope and a fixed quote. You know the price before any work starts.</p>
+        </li>
+        <li class="card stack-card" style="--i:1">
+          <div class="stack-top"><span class="step-no">02</span><span class="tag">Weeks 1–2</span></div>
+          <h3>Design</h3>
+          <p>We shape the screens from the closest template, in Figma or straight in code. You review and comment on every screen.</p>
+        </li>
+        <li class="card stack-card" style="--i:2">
+          <div class="stack-top"><span class="step-no">03</span><span class="tag">Weeks 2–5</span></div>
+          <h3>Build</h3>
+          <p>UI and backend are built side by side. Every Friday you get a preview link and a short written update.</p>
+        </li>
+        <li class="card stack-card" style="--i:3">
+          <div class="stack-top"><span class="step-no">04</span><span class="tag">Week 6</span></div>
+          <h3>Launch</h3>
+          <p>We deploy to your servers or cloud, hand over the repository and docs, and fix anything that breaks for 90 days.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ 09 · PRICING + FAQ ============ -->
   <div class="scene-group" id="pricing" data-shape="wave" data-side="center" data-zoom="11" data-dim="0.4" data-label="Pricing">
     <section class="scene pricing">
       <div class="wrap">
         <div class="copy copy-center">
           <p class="eyebrow reveal">Pricing</p>
-          <h2 data-split>Buy the template. Add the support you need.</h2>
-          <p class="lede reveal">Pay once for the template. Launch help and ongoing care are optional.</p>
+          <h2 data-split>Three ways to work with us.</h2>
+          <p class="lede reveal">Buy a template, have us set it up, or have us build the whole product.</p>
         </div>
         <div class="plans">
           <article class="card plan reveal" data-tilt>
             <span class="tag">Template</span>
-            <p class="plan-price"><strong>$490</strong><span>one-time</span></p>
-            <p class="plan-for">You build it yourself</p>
-            <ul class="checklist"><li>All pages and sections</li><li>3D scene and four colour skins</li><li>Written guide</li><li>12 months of updates and email support</li></ul>
-            <a class="btn ghost" href="#contact"><span>Buy the template</span></a>
+            <p class="plan-price"><strong>$290</strong><span>from, one-time</span></p>
+            <p class="plan-for">You build on it yourself</p>
+            <ul class="checklist"><li>UI or backend template</li><li>Docs, types and tests</li><li>12 months of updates</li><li>Email support from the authors</li></ul>
+            <a class="btn ghost" href="#catalogue"><span>Browse templates</span></a>
           </article>
           <article class="card plan plan-featured reveal" data-tilt>
-            <span class="tag">Template + launch · most chosen</span>
-            <p class="plan-price"><strong>$1,900</strong><span>one-time</span></p>
-            <p class="plan-for">We build it with you</p>
-            <ul class="checklist"><li>Everything in Template</li><li>Your brand, copy and images placed</li><li>Forms connected to your inbox or CRM</li><li>Live on your domain in 10 working days</li></ul>
-            <a class="btn" href="#contact"><span>Start a launch</span></a>
+            <span class="tag">Setup · most chosen</span>
+            <p class="plan-price"><strong>$1,900</strong><span>from, one-time</span></p>
+            <p class="plan-for">We fit it to you and deploy it</p>
+            <ul class="checklist"><li>Templates included</li><li>Your brand, content and data</li><li>UI and backend connected</li><li>Live in about 10 working days</li></ul>
+            <a class="btn" href="#builder"><span>Estimate a setup</span></a>
           </article>
           <article class="card plan reveal" data-tilt>
-            <span class="tag">Care plan</span>
-            <p class="plan-price"><strong>$240</strong><span>per month</span></p>
-            <p class="plan-for">We keep it running</p>
-            <ul class="checklist"><li>Content changes within 2 working days</li><li>Uptime monitoring and backups</li><li>Template updates applied for you</li><li>Priority support queue</li></ul>
-            <a class="btn ghost" href="#contact"><span>Add a care plan</span></a>
+            <span class="tag">Custom build</span>
+            <p class="plan-price"><strong>$6,500</strong><span>from, fixed quote</span></p>
+            <p class="plan-for">We build your product</p>
+            <ul class="checklist"><li>UI and backend to your spec</li><li>Preview link every week</li><li>You own the repository</li><li>90 days of fixes after launch</li></ul>
+            <a class="btn ghost" href="#contact"><span>Talk about a build</span></a>
           </article>
         </div>
+        <p class="plans-note reveal">Need changes after launch? A care plan from $240 a month covers updates, monitoring and small changes.</p>
       </div>
     </section>
 
@@ -310,47 +446,51 @@
       <div class="wrap faq-grid">
         <div class="copy">
           <p class="eyebrow reveal">Questions</p>
-          <h2 data-split>Asked before every purchase.</h2>
+          <h2 data-split>Asked before every project.</h2>
         </div>
         <div class="faq-list reveal">
           <details open>
-            <summary>Do I need a developer to use a template?</summary>
-            <p>Not for copy, images and colours. The guide shows where each one lives. For new page types or integrations, choose the launch package or a care plan and our team does it.</p>
+            <summary>Which stacks do you work in?</summary>
+            <p>For UI: React, Next.js, Vue, Nuxt and Svelte. For backends: Node.js, Python, Go and PHP, with PostgreSQL, MySQL or MongoDB. If your team already has a stack, we work in it.</p>
           </details>
           <details>
-            <summary>Where can I host the site?</summary>
-            <p>Anywhere that serves static files, including GitHub Pages, Netlify, Vercel or your own server. There is nothing to install on the server.</p>
+            <summary>Can you put a UI template and a backend template together?</summary>
+            <p>Yes. Our full-stack starters already are. With a setup package we connect any UI template to any backend template and deploy them together.</p>
           </details>
           <details>
-            <summary>Can I use one template for several websites?</summary>
-            <p>Each licence covers one company website. Agencies and groups building several sites can ask us for a multi-site licence.</p>
+            <summary>Do we own the code?</summary>
+            <p>Templates come with a commercial licence for one product, and you can change anything. On a custom build the repository is transferred to you at launch.</p>
           </details>
           <details>
-            <summary>What does support cover?</summary>
-            <p>Questions about the template, bug fixes and updates for 12 months. Changes to your content and design are part of the launch package and the care plan.</p>
+            <summary>Can you work on our existing product?</summary>
+            <p>Yes. Many custom builds extend an app a client already runs: a new admin panel, an API for a mobile app, or an integration with another system.</p>
+          </details>
+          <details>
+            <summary>What happens after launch?</summary>
+            <p>Templates get 12 months of updates. Custom builds get 90 days of fixes. After that, a care plan covers updates, monitoring and small changes.</p>
           </details>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- ============ 09 · CONTACT ============ -->
+  <!-- ============ 10 · CONTACT ============ -->
   <section class="scene contact" id="contact" data-shape="knot" data-side="right" data-zoom="12" data-label="Contact">
     <div class="wrap">
       <div class="copy">
-        <p class="eyebrow reveal">Talk to us</p>
-        <h2 data-split>Tell us about the site you need.</h2>
-        <p class="lede reveal">Say what you sell and who buys it. We reply within one working day with the template we would start from.</p>
+        <p class="eyebrow reveal">Start a project</p>
+        <h2 data-split>Tell us what you are building.</h2>
+        <p class="lede reveal">We reply within one working day with the templates we would start from and a guide price.</p>
         <form class="form reveal" id="demo-form" novalidate>
           <label for="f-name">Name<input id="f-name" name="name" autocomplete="name" required></label>
           <label for="f-email">Work email<input id="f-email" name="email" type="email" autocomplete="email" required></label>
           <label for="f-company">Company<input id="f-company" name="company" autocomplete="organization"></label>
-          <label for="f-interest">I am interested in
+          <label for="f-interest">I need
             <select id="f-interest" name="interest">
-              <option>Template only</option><option>Template + launch</option><option>Care plan</option><option>Support for a site I already have</option>
+              <option>A UI template</option><option>A backend template</option><option>A full-stack starter</option><option>Setup of a template</option><option>A custom build</option><option>Something else</option>
             </select>
           </label>
-          <label class="full" for="f-msg">What do you sell, and to whom?<textarea id="f-msg" name="message" rows="3"></textarea></label>
+          <label class="full" for="f-msg">What are you building?<textarea id="f-msg" name="message" rows="4"></textarea></label>
           <button class="btn full" type="submit" data-magnetic><span>Send enquiry</span></button>
           <p class="form-note full" id="form-note" role="status">Or write to <a data-email href="mailto:hello@northframe.example">hello@northframe.example</a></p>
         </form>
@@ -359,16 +499,19 @@
   </section>
 </main>
 
+<!-- Mobile: a call to action that stays in reach once the hero has scrolled away -->
+<a class="dock-cta" id="dock-cta" href="#builder"><span>Estimate your project</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+
 <!-- ============ FOOTER ============ -->
 <footer class="site-footer">
   <div class="footer-word" aria-hidden="true" data-footer-word><span data-brand>Northframe</span></div>
   <div class="wrap footer-grid">
     <div>
       <a class="brand" href="#top"><svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><path d="M5 5h22v22H5zM5 13h22M13 13v14" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linejoin="miter"/></svg><span data-brand>Northframe</span></a>
-      <p class="footer-note">Sample content. The brand name, prices, timings and plan details are placeholders to replace with your own.</p>
+      <p class="footer-note">Sample content. The brand name, template names, prices, timings and commitments are placeholders to replace with your own.</p>
     </div>
     <nav aria-label="Footer">
-      <a href="#inside">What's inside</a><a href="#templates">Templates</a><a href="#support">Support</a><a href="#pricing">Pricing</a><a href="#contact">Contact</a>
+      <a href="#make">What we make</a><a href="#catalogue">Templates</a><a href="#builder">Estimate</a><a href="#pricing">Pricing</a><a href="#contact">Contact</a>
     </nav>
     <div class="footer-meta"><span>© <span id="year">2026</span> <span data-brand>Northframe</span></span><a href="#top">Back to top ↑</a></div>
   </div>
