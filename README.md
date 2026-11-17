@@ -31,3 +31,7 @@ Then open http://localhost:8000. Any static host (GitHub Pages, Netlify, Vercel)
 - **Real 3D models** — drop `.glb` files in `models/` and list them in `models/models.json`; see `models/README.md`
 
 Three.js (MIT) is vendored in `vendor/`.
+
+## B2B template
+
+`b2b-template/` is a separate, self-contained immersive 3D site for a studio that sells UI and backend templates and does custom builds. See [b2b-template/README.md](b2b-template/README.md). On GitHub Pages it is served at `/b2b-template/`.
